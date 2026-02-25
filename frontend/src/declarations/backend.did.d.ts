@@ -24,11 +24,42 @@ export interface MenuItem {
   'price' : number,
 }
 export type MenuItemId = bigint;
+export interface UpiSettings {
+  'merchantName' : string,
+  'qrCodeData' : string,
+  'upiId' : string,
+}
 export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
 export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'addMenuItem' : ActorMethod<
     [string, string, number, Category, [] | [string]],
@@ -39,16 +70,16 @@ export interface _SERVICE {
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getMenuItems' : ActorMethod<[], Array<MenuItem>>,
-  'getPaymentQRCode' : ActorMethod<[], [] | [string]>,
+  'getUpiSettings' : ActorMethod<[], [] | [UpiSettings]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  'setPaymentQRCode' : ActorMethod<[string], undefined>,
   'toggleAvailability' : ActorMethod<[MenuItemId], undefined>,
   'updateMenuItem' : ActorMethod<
     [MenuItemId, string, string, number, Category, [] | [string]],
     undefined
   >,
+  'updateUpiSettings' : ActorMethod<[UpiSettings], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

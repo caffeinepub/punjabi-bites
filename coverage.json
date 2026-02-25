@@ -1,62 +1,36 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T12:45:28.890Z",
+  "generatedAt": "2026-02-25T17:42:10.061Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 3,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the intermittent failure in the food menu display on MenuDisplay.tsx: add robust error handling and retry logic so that when the menu items query fails or returns empty, a user-friendly error state with a retry button is shown instead of a blank screen or cryptic error message.",
+        "summary": "Fix the Pay Now button in CartSidebar so it is visible and functional on all devices, including mobile. The button should appear in the cart panel when items are in the cart and trigger the UPI deep link flow. Ensure it is not hidden by CSS, conditional rendering logic, or z-index/overflow issues.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/MenuDisplay.tsx"
+          "frontend/src/components/CartSidebar.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/MenuDisplay.tsx"
+          "frontend/src/components/CartSidebar.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Fix the intermittent failure in the payment options display on PaymentPage.tsx: ensure the payment QR code and payment options load reliably by adding error boundaries, retry logic on the usePaymentQRCode query, and a fallback UI when the QR code cannot be loaded.",
+        "summary": "Audit the PaymentPage UPI settings fetch: if UPI settings are missing or empty, display a user-friendly fallback message instead of a blank or broken payment UI, so users always understand the payment state.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/PaymentPage.tsx",
-          "frontend/src/components/PaymentQRCodeModal.tsx"
+          "frontend/src/pages/PaymentPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/PaymentPage.tsx",
-          "frontend/src/components/PaymentQRCodeModal.tsx"
+          "frontend/src/pages/PaymentPage.tsx"
         ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Add a global error boundary component to catch and display unhandled React rendering errors across all pages, showing a friendly error screen with a reload option rather than a white blank screen.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ErrorBoundary.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ErrorBoundary.tsx",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Audit the backend Motoko actor's getMenuItems and getPaymentQRCode query functions to ensure they always return a valid, non-error response even under concurrent load or empty state conditions — returning empty arrays or null values rather than trapping.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
       }
     ]
   },
@@ -65,11 +39,7 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/components/ErrorBoundary.tsx",
-    "frontend/src/components/PaymentQRCodeModal.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/MenuDisplay.tsx",
+    "frontend/src/components/CartSidebar.tsx",
     "frontend/src/pages/PaymentPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",

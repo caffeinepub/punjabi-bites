@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-intermittent-failure-in-the-food-menu-display-on-menudisplay-tsx-add-robust-error-handling-and-retry-logic-so-that-when-the-menu-items-query-fails-or-returns-empty-a-user-friendly-error-state-with-a-retry-button-is-shown-instead-of-a-blank-screen-or-cryptic-error-message",
-      "featureTitle": "Fix the intermittent failure in the food menu display on MenuDisplay.tsx: add robust error handling and retry logic so that when the menu items query fails or returns empty, a user-friendly error state with a retry button is shown instead of a blank screen or cryptic error message.",
+      "featureId": "feature-fix-the-pay-now-button-in-cartsidebar-so-it-is-visible-and-functional-on-all-devices-including-mobile-the-button-should-appear-in-the-cart-panel-when-items-are-in-the-cart-and-trigger-the-upi-deep-link-flow-ensure-it-is-not-hidden-by-css-conditional-rendering-logic-or-z-index-overflow-issues",
+      "featureTitle": "Fix the Pay Now button in CartSidebar so it is visible and functional on all devices, including mobile. The button should appear in the cart panel when items are in the cart and trigger the UPI deep link flow. Ensure it is not hidden by CSS, conditional rendering logic, or z-index/overflow issues.",
       "files": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/MenuDisplay.tsx"
+        "frontend/src/components/CartSidebar.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -16,7 +15,8 @@
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
         "camera@1.0.0",
-        "qr-code@1.0.0"
+        "qr-code@1.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
         "REQ-1"
@@ -24,11 +24,9 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-fix-the-intermittent-failure-in-the-payment-options-display-on-paymentpage-tsx-ensure-the-payment-qr-code-and-payment-options-load-reliably-by-adding-error-boundaries-retry-logic-on-the-usepaymentqrcode-query-and-a-fallback-ui-when-the-qr-code-cannot-be-loaded",
-      "featureTitle": "Fix the intermittent failure in the payment options display on PaymentPage.tsx: ensure the payment QR code and payment options load reliably by adding error boundaries, retry logic on the usePaymentQRCode query, and a fallback UI when the QR code cannot be loaded.",
+      "featureId": "feature-audit-the-paymentpage-upi-settings-fetch-if-upi-settings-are-missing-or-empty-display-a-user-friendly-fallback-message-instead-of-a-blank-or-broken-payment-ui-so-users-always-understand-the-payment-state",
+      "featureTitle": "Audit the PaymentPage UPI settings fetch: if UPI settings are missing or empty, display a user-friendly fallback message instead of a blank or broken payment UI, so users always understand the payment state.",
       "files": [
-        "frontend/src/components/PaymentQRCodeModal.tsx",
-        "frontend/src/hooks/useQueries.ts",
         "frontend/src/pages/PaymentPage.tsx"
       ],
       "components": [
@@ -39,32 +37,11 @@
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
         "camera@1.0.0",
-        "qr-code@1.0.0"
+        "qr-code@1.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
         "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-global-error-boundary-component-to-catch-and-display-unhandled-react-rendering-errors-across-all-pages-showing-a-friendly-error-screen-with-a-reload-option-rather-than-a-white-blank-screen",
-      "featureTitle": "Add a global error boundary component to catch and display unhandled React rendering errors across all pages, showing a friendly error screen with a reload option rather than a white blank screen.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/ErrorBoundary.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "camera@1.0.0",
-        "qr-code@1.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
       ],
       "confidence": "high"
     }

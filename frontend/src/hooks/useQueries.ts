@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
 import { useInternetIdentity } from './useInternetIdentity';
-import { MenuItem, Category } from '../backend';
+import { MenuItem, Category, UpiSettings } from '../backend';
 
 // ─── Queries ────────────────────────────────────────────────────────────────
 
@@ -25,7 +25,6 @@ export function useGetMenuItems() {
 export function useIsAdmin() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
-  // Include the principal in the query key so the query re-runs when the user logs in/out
   const principalKey = identity?.getPrincipal().toString() ?? 'anonymous';
 
   return useQuery<boolean>({
@@ -39,18 +38,18 @@ export function useIsAdmin() {
       }
     },
     enabled: !!actor && !isFetching,
-    staleTime: 0, // Always re-check on mount/focus
+    staleTime: 0,
   });
 }
 
-export function useGetPaymentQRCode() {
+export function useUPISettings() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<string | null>({
-    queryKey: ['paymentQRCode'],
+  return useQuery<UpiSettings | null>({
+    queryKey: ['upiSettings'],
     queryFn: async () => {
       if (!actor) return null;
-      return actor.getPaymentQRCode();
+      return actor.getUpiSettings();
     },
     enabled: !!actor && !isFetching,
     retry: 3,
@@ -152,17 +151,17 @@ export function useToggleAvailability() {
   });
 }
 
-export function useSetPaymentQRCode() {
+export function useUpdateUPISettings() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: string) => {
+    mutationFn: async (newSettings: UpiSettings) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.setPaymentQRCode(data);
+      return actor.updateUpiSettings(newSettings);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['paymentQRCode'] });
+      queryClient.invalidateQueries({ queryKey: ['upiSettings'] });
     },
   });
 }

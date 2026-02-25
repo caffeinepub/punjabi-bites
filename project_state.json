@@ -1,49 +1,31 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Restaurant app with QR code flow, payment options, and food menu. Currently fixing intermittent 'failed to show menu' error affecting payment options and food menu display.",
+  "summary": "Project includes a cart with a Pay Now payment option that is not displaying correctly on mobile.",
   "architectural_notes": [],
   "known_issues": [
-    "Payment options and food menu intermittently fail to load, showing 'failed to show menu' error message"
+    "Payment option (Pay Now) not showing in cart on mobile"
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-the-intermittent-failure-in-the-food-menu-display-on-menudisplay-tsx-add-robust-error-handling-and-retry-logic-so-that-when-the-menu-items-query-fails-or-returns-empty-a-user-friendly-error-state-with-a-retry-button-is-shown-instead-of-a-blank-screen-or-cryptic-error-message",
-      "title": "Fix the intermittent failure in the food menu display on MenuDisplay.tsx: add robust error handling and retry logic so that when the menu items query fails or returns empty, a user-friendly error state with a retry button is shown instead of a blank screen or cryptic error message.",
+      "id": "feature-fix-the-pay-now-button-in-cartsidebar-so-it-is-visible-and-functional-on-all-devices-including-mobile-the-button-should-appear-in-the-cart-panel-when-items-are-in-the-cart-and-trigger-the-upi-deep-link-flow-ensure-it-is-not-hidden-by-css-conditional-rendering-logic-or-z-index-overflow-issues",
+      "title": "Fix the Pay Now button in CartSidebar so it is visible and functional on all devices, including mobile. The button should appear in the cart panel when items are in the cart and trigger the UPI deep link flow. Ensure it is not hidden by CSS, conditional rendering logic, or z-index/overflow issues.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-fix-the-intermittent-failure-in-the-payment-options-display-on-paymentpage-tsx-ensure-the-payment-qr-code-and-payment-options-load-reliably-by-adding-error-boundaries-retry-logic-on-the-usepaymentqrcode-query-and-a-fallback-ui-when-the-qr-code-cannot-be-loaded",
-      "title": "Fix the intermittent failure in the payment options display on PaymentPage.tsx: ensure the payment QR code and payment options load reliably by adding error boundaries, retry logic on the usePaymentQRCode query, and a fallback UI when the QR code cannot be loaded.",
+      "id": "feature-audit-the-paymentpage-upi-settings-fetch-if-upi-settings-are-missing-or-empty-display-a-user-friendly-fallback-message-instead-of-a-blank-or-broken-payment-ui-so-users-always-understand-the-payment-state",
+      "title": "Audit the PaymentPage UPI settings fetch: if UPI settings are missing or empty, display a user-friendly fallback message instead of a blank or broken payment UI, so users always understand the payment state.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
-    },
-    {
-      "id": "feature-add-a-global-error-boundary-component-to-catch-and-display-unhandled-react-rendering-errors-across-all-pages-showing-a-friendly-error-screen-with-a-reload-option-rather-than-a-white-blank-screen",
-      "title": "Add a global error boundary component to catch and display unhandled React rendering errors across all pages, showing a friendly error screen with a reload option rather than a white blank screen.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-4",
-      "summary": "Audit the backend Motoko actor's getMenuItems and getPaymentQRCode query functions to ensure they always return a valid, non-error response even under concurrent load or empty state conditions — returning empty arrays or null values rather than trapping.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "status": "pending"
-    }
-  ],
-  "gameProjectType": "none",
+  "new_feature_requests": [],
   "projectName": "Punjabi Bites",
   "clarification_mode": "instant",
   "clarification_rounds": 0

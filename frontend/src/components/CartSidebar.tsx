@@ -1,24 +1,86 @@
-import { ShoppingCart, Plus, Minus, Trash2, X, ShoppingBag } from 'lucide-react';
+import { useState } from 'react';
+import { ShoppingCart, Plus, Minus, Trash2, X, ShoppingBag, Smartphone, CheckCircle2, AlertCircle, RefreshCw, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from '@tanstack/react-router';
+import { useUPISettings } from '../hooks/useQueries';
+import { saveReceiptData, ReceiptItem } from '../pages/PaymentPage';
 
 interface CartSidebarProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+/** Detect if the user is on a mobile device */
+function isMobileDevice(): boolean {
+  return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+}
+
+/** Build a UPI deep link */
+function buildUPIDeepLink(upiId: string, merchantName: string, amount: number): string {
+  const params = new URLSearchParams({
+    pa: upiId,
+    pn: merchantName,
+    am: amount.toFixed(2),
+    cu: 'INR',
+  });
+  return `upi://pay?${params.toString()}`;
+}
+
 export default function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
-  const { cartItems, removeItem, updateQuantity, totalAmount, totalCount } = useCart();
+  const { cartItems, removeItem, updateQuantity, totalAmount, totalCount, clearCart } = useCart();
   const navigate = useNavigate();
+  const isMobile = isMobileDevice();
+
+  const {
+    data: upiSettings,
+    isLoading: upiLoading,
+    isFetching: upiFetching,
+    error: upiError,
+    refetch: refetchUPI,
+  } = useUPISettings();
+
+  const [paymentInitiated, setPaymentInitiated] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
   const handleCheckout = () => {
     onOpenChange(false);
     navigate({ to: '/payment' });
   };
+
+  const handlePayNow = () => {
+    if (!upiSettings?.upiId) return;
+    const deepLink = buildUPIDeepLink(
+      upiSettings.upiId,
+      upiSettings.merchantName,
+      totalAmount
+    );
+    // Save receipt data before leaving
+    const receiptItems: ReceiptItem[] = cartItems.map((ci) => ({
+      id: ci.item.id.toString(),
+      name: ci.item.name,
+      price: ci.item.price,
+      quantity: ci.quantity,
+    }));
+    saveReceiptData({ items: receiptItems, total: totalAmount, scannedData: null });
+    window.location.href = deepLink;
+    setPaymentInitiated(true);
+  };
+
+  const handleConfirmPayment = () => {
+    setPaymentConfirmed(true);
+    clearCart();
+    onOpenChange(false);
+    navigate({ to: '/receipt' });
+  };
+
+  const cartIsEmpty = cartItems.length === 0;
+  const hasUPI = !!upiSettings?.upiId;
 
   return (
     <>
@@ -52,7 +114,7 @@ export default function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 bg-deepRed text-cream">
+        <div className="flex items-center justify-between px-5 py-4 bg-deepRed text-cream flex-shrink-0">
           <div className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5 text-saffron" />
             <h2 className="font-display font-black text-lg">Your Cart</h2>
@@ -91,7 +153,7 @@ export default function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
           </div>
         ) : (
           <>
-            <ScrollArea className="flex-1 px-4 py-3">
+            <ScrollArea className="flex-1 px-4 py-3 min-h-0">
               <div className="space-y-3">
                 {cartItems.map((ci) => (
                   <div
@@ -148,24 +210,112 @@ export default function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
               </div>
             </ScrollArea>
 
-            {/* Footer with total and checkout */}
-            <div className="px-5 py-4 border-t border-saffron/20 bg-white">
+            {/* Footer with total and actions */}
+            <div className="px-5 py-4 border-t border-saffron/20 bg-white flex-shrink-0">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-gray-500 text-sm">Subtotal</span>
                 <span className="font-bold text-deepRed text-base">₹{totalAmount.toFixed(0)}</span>
               </div>
-              <p className="text-xs text-gray-400 mb-4">Taxes and charges may apply</p>
+              <p className="text-xs text-gray-400 mb-3">Taxes and charges may apply</p>
 
-              <Separator className="mb-4 bg-saffron/15" />
+              <Separator className="mb-3 bg-saffron/15" />
 
-              <Button
-                onClick={handleCheckout}
-                disabled={cartItems.length === 0}
-                className="w-full bg-saffron hover:bg-saffron/90 text-deepRed font-bold text-base py-5 rounded-xl shadow-md gap-2"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                Checkout · ₹{totalAmount.toFixed(0)}
-              </Button>
+              <div className="space-y-2">
+                {/* UPI loading indicator */}
+                {upiLoading && (
+                  <div className="flex items-center justify-center gap-2 py-3 text-sm text-gray-400 bg-gray-50 rounded-xl border border-gray-100">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Loading payment options…</span>
+                  </div>
+                )}
+
+                {/* UPI error state */}
+                {!upiLoading && upiError && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2 bg-red-50 rounded-xl px-3 py-2 border border-red-100">
+                      <div className="flex items-center gap-2 text-red-600 text-xs">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        <span>Failed to load payment settings</span>
+                      </div>
+                      <button
+                        onClick={() => refetchUPI()}
+                        disabled={upiFetching}
+                        className="text-xs text-deepRed font-semibold underline shrink-0"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                    {/* Still show checkout as fallback */}
+                    <Button
+                      onClick={handleCheckout}
+                      disabled={cartIsEmpty}
+                      className="w-full bg-saffron hover:bg-saffron/90 text-deepRed font-bold text-base rounded-xl shadow-md gap-2 min-h-[52px]"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      Checkout · ₹{totalAmount.toFixed(0)}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Payment options when UPI loaded successfully */}
+                {!upiLoading && !upiError && (
+                  <>
+                    {/* Pay Now via UPI deep link — shown when UPI settings are available */}
+                    {hasUPI && !paymentInitiated && (
+                      <>
+                        {isMobile ? (
+                          <button
+                            onClick={handlePayNow}
+                            className="w-full flex items-center justify-center gap-2 bg-deepRed hover:bg-deepRed/90 text-white font-bold text-base py-4 px-6 rounded-xl shadow-md transition-all active:scale-95 min-h-[52px]"
+                          >
+                            <Smartphone className="w-5 h-5" />
+                            Pay ₹{totalAmount.toFixed(0)} via UPI
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleCheckout}
+                            className="w-full flex items-center justify-center gap-2 bg-deepRed hover:bg-deepRed/90 text-white font-bold text-base py-4 px-6 rounded-xl shadow-md transition-all active:scale-95 min-h-[52px]"
+                          >
+                            <CreditCard className="w-5 h-5" />
+                            Pay ₹{totalAmount.toFixed(0)} Now
+                          </button>
+                        )}
+                      </>
+                    )}
+
+                    {/* After payment initiated on mobile: confirm button */}
+                    {isMobile && paymentInitiated && !paymentConfirmed && (
+                      <>
+                        <div className="flex items-start gap-2 bg-saffron/10 border border-saffron/30 rounded-xl px-3 py-2.5">
+                          <Smartphone className="w-4 h-4 text-saffron shrink-0 mt-0.5" />
+                          <p className="text-xs text-deepRed font-medium">
+                            Complete the payment in your UPI app, then tap below.
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleConfirmPayment}
+                          className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-xl shadow-md transition-all active:scale-95 min-h-[52px]"
+                        >
+                          <CheckCircle2 className="w-5 h-5" />
+                          I've Paid — Confirm Order
+                        </button>
+                      </>
+                    )}
+
+                    {/* No UPI configured: show checkout button that goes to payment page */}
+                    {!hasUPI && (
+                      <Button
+                        onClick={handleCheckout}
+                        disabled={cartIsEmpty}
+                        className="w-full bg-saffron hover:bg-saffron/90 text-deepRed font-bold text-base rounded-xl shadow-md gap-2 min-h-[52px]"
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        Checkout · ₹{totalAmount.toFixed(0)}
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </>
         )}

@@ -1,12 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Fix intermittent "failed to show menu" and payment options errors in the Punjabi Bites app by adding robust error handling, retry logic, and a global error boundary.
+**Goal:** Fix the Pay Now button visibility in CartSidebar and add a fallback message on PaymentPage when UPI settings are missing.
 
 **Planned changes:**
-- Add retry logic (at least 3 retries with backoff) to the React Query hook for menu items in `MenuDisplay.tsx`, and show a user-friendly error state with a "Try Again" button and loading skeleton when data fails to load
-- Add retry logic to the React Query hook for the payment QR code in `PaymentPage.tsx`, and show a fallback error UI with a retry button when the QR code or payment options fail to load; handle loading and error states in `PaymentQRCodeModal` as well
-- Add a global React error boundary component wrapping main route content in `App.tsx` that displays a branded error screen with a "Reload" button on unhandled rendering errors
-- Audit and fix the backend Motoko `getMenuItems` and `getPaymentQRCode` query functions to always return valid responses (empty array or null) without trapping under concurrent load or empty state conditions
+- Fix the Pay Now button in CartSidebar so it is visible and functional on all devices (mobile and desktop) when the cart contains at least one item, resolving any CSS, conditional rendering, z-index, or overflow issues hiding it.
+- Audit the PaymentPage UPI settings fetch and display a user-friendly fallback message (e.g., "Payment is currently unavailable. Please contact the restaurant.") when UPI settings are missing or empty, instead of a blank or broken UI.
 
-**User-visible outcome:** The food menu and payment options load reliably on repeated visits; when a transient failure occurs, users see a clear error message with a retry option instead of a blank screen or cryptic error.
+**User-visible outcome:** Users can see and tap the Pay Now button in the cart on all devices, and will see a clear message if payment is currently unavailable rather than a blank screen.

@@ -20,6 +20,11 @@ export type MenuItemId = bigint;
 export interface UserProfile {
     name: string;
 }
+export interface UpiSettings {
+    merchantName: string;
+    qrCodeData: string;
+    upiId: string;
+}
 export enum Category {
     mainCourse = "mainCourse",
     dessert = "dessert",
@@ -38,11 +43,11 @@ export interface backendInterface {
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getMenuItems(): Promise<Array<MenuItem>>;
-    getPaymentQRCode(): Promise<string | null>;
+    getUpiSettings(): Promise<UpiSettings | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    setPaymentQRCode(data: string): Promise<void>;
     toggleAvailability(id: MenuItemId): Promise<void>;
     updateMenuItem(id: MenuItemId, name: string, description: string, price: number, category: Category, imageUrl: string | null): Promise<void>;
+    updateUpiSettings(newSettings: UpiSettings): Promise<void>;
 }

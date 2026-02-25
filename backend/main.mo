@@ -5,6 +5,9 @@ import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import MixinStorage "blob-storage/Mixin";
+
+
 
 actor {
   type MenuItemId = Nat;
@@ -30,15 +33,21 @@ actor {
     name : Text;
   };
 
+  public type UpiSettings = {
+    upiId : Text;
+    merchantName : Text;
+    qrCodeData : Text;
+  };
+
   let menuItems = Map.empty<MenuItemId, MenuItem>();
   var nextMenuItemId = 1;
 
   let userProfiles = Map.empty<Principal, UserProfile>();
-
-  // Store payment QR code image data (base64 or URL)
-  var paymentQRCode : ?Text = null;
+  var upiSettings : ?UpiSettings = null;
 
   let accessControlState = AccessControl.initState();
+
+  include MixinStorage();
   include MixinAuthorization(accessControlState);
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
@@ -93,14 +102,14 @@ actor {
       case (null) {
         Runtime.trap("Menu item not found");
       };
-      case (?existingItem) {
+      case (?menuItem) {
         let updatedItem : MenuItem = {
           id;
           name;
           description;
           price;
           category;
-          isAvailable = existingItem.isAvailable;
+          isAvailable = menuItem.isAvailable;
           imageUrl;
         };
         menuItems.add(id, updatedItem);
@@ -133,31 +142,31 @@ actor {
       case (null) {
         Runtime.trap("Menu item not found");
       };
-      case (?existingItem) {
+      case (?menuItem) {
         let updatedItem : MenuItem = {
           id;
-          name = existingItem.name;
-          description = existingItem.description;
-          price = existingItem.price;
-          category = existingItem.category;
-          isAvailable = not existingItem.isAvailable;
-          imageUrl = existingItem.imageUrl;
+          name = menuItem.name;
+          description = menuItem.description;
+          price = menuItem.price;
+          category = menuItem.category;
+          isAvailable = not menuItem.isAvailable;
+          imageUrl = menuItem.imageUrl;
         };
         menuItems.add(id, updatedItem);
       };
     };
   };
 
-  // Admin-only: Set the payment QR code (base64 or image URL)
-  public shared ({ caller }) func setPaymentQRCode(data : Text) : async () {
+  // Admin-only: Update UPI settings
+  public shared ({ caller }) func updateUpiSettings(newSettings : UpiSettings) : async () {
     if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Admins only");
     };
-    paymentQRCode := ?data;
+    upiSettings := ?newSettings;
   };
 
-  // Public: Get the payment QR code image data
-  public query ({ caller }) func getPaymentQRCode() : async ?Text {
-    paymentQRCode;
+  // Public: Get current UPI settings
+  public query ({ caller }) func getUpiSettings() : async ?UpiSettings {
+    upiSettings;
   };
 };

@@ -1,75 +1,38 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix intermittent 'failed to show menu' error for food menu and payment options",
+  "title": "Fix Pay Now button visibility in CartSidebar",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Fix intermittent failure in food menu display with robust error handling and retry logic",
+      "summary": "Fix the Pay Now button in CartSidebar so it is visible and functional on all devices, including mobile",
       "acceptanceCriteria": [
-        "Menu items load successfully on repeated page visits without intermittent blank states",
-        "When loading fails, a clear error message with a 'Try Again' retry button is shown",
-        "The React Query hook for menu items uses retry logic (at least 3 retries with backoff) to handle transient backend failures",
-        "Loading skeleton is shown while data is being fetched or retried"
+        "The Pay Now button is visible in the CartSidebar on mobile devices when the cart contains at least one item.",
+        "The Pay Now button is visible on desktop as well.",
+        "Tapping/clicking the Pay Now button on mobile initiates the UPI deep link flow.",
+        "No layout overflow or z-index issue hides the button on small screens.",
+        "The button renders consistently across common mobile viewport sizes (e.g., 375px, 414px width)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/CartSidebar.tsx",
           "operation": "modify",
-          "description": "Enhance the useMenuItems query hook with retry logic: configure retry: 3, retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000) to implement exponential backoff for transient failures. Add staleTime and gcTime configuration to prevent unnecessary refetches that might trigger errors."
-        },
-        {
-          "path": "frontend/src/pages/MenuDisplay.tsx",
-          "operation": "modify",
-          "description": "Add comprehensive error state handling to MenuDisplay: when the useMenuItems query returns an error, display a user-friendly error message with a 'Try Again' button that calls refetch(). Ensure the loading skeleton is shown during initial load and retries. Replace any blank error states with clear messaging explaining the issue and offering retry."
+          "description": "Audit and fix the Pay Now button visibility and layout issues. Ensure the button is not hidden by CSS overflow, z-index problems, or conditional rendering logic. Verify the button appears when cart has items, is properly styled for mobile viewports (375px, 414px widths), and triggers the UPI deep link flow correctly. Check container sizing, scrolling behavior, and sticky/fixed positioning that might clip the button on small screens. Test the UPI deep link generation and mobile-specific payment flow trigger."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Fix intermittent failure in payment options display with error boundaries, retry logic, and fallback UI",
+      "summary": "Audit the PaymentPage UPI settings fetch and display a user-friendly fallback message when settings are missing",
       "acceptanceCriteria": [
-        "Payment QR code and payment options render consistently without intermittent blank or error states",
-        "When the QR code query fails, a user-friendly error message with a retry button is displayed instead of a blank payment page",
-        "The React Query hook for the payment QR code uses retry logic (at least 3 retries with backoff)",
-        "The PaymentQRCodeModal also handles loading and error states gracefully"
+        "If UPI settings are not configured, the PaymentPage shows a clear message (e.g., 'Payment is currently unavailable. Please contact the restaurant.') instead of a blank screen.",
+        "If UPI settings are available, the normal payment flow is displayed without errors."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Enhance the usePaymentQRCode query hook with retry logic: configure retry: 3, retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000) to implement exponential backoff. Add staleTime configuration to reduce unnecessary refetches."
-        },
         {
           "path": "frontend/src/pages/PaymentPage.tsx",
           "operation": "modify",
-          "description": "Add comprehensive error handling to PaymentPage: when usePaymentQRCode returns an error, display a user-friendly error message with a 'Try Again' button that calls refetch(). Show a loading state while the QR code is being fetched or retried. Ensure the page never renders blank when the query fails."
-        },
-        {
-          "path": "frontend/src/components/PaymentQRCodeModal.tsx",
-          "operation": "modify",
-          "description": "Add loading and error state handling to PaymentQRCodeModal: display a loading skeleton while the QR code is being fetched, and show a fallback error message with retry option if the QR code fails to load. Ensure the modal never shows a blank state."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Add global error boundary component to catch unhandled React rendering errors",
-      "acceptanceCriteria": [
-        "A React error boundary wraps the main route content in App.tsx",
-        "When any page crashes, the error boundary shows a branded error screen with a 'Reload' button",
-        "Error boundary does not interfere with normal application flow"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ErrorBoundary.tsx",
-          "operation": "create",
-          "description": "Create an ErrorBoundary class component that catches React rendering errors using componentDidCatch lifecycle method. The fallback UI should display a branded Punjabi Bites error screen with the error message and a 'Reload Page' button that calls window.location.reload(). Include proper TypeScript types for props (children) and state (hasError, error)."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Wrap the RouterProvider component with the new ErrorBoundary component to catch rendering errors across all routes. Import ErrorBoundary from './components/ErrorBoundary' and wrap it around the existing RouterProvider without changing the route structure or other providers."
+          "description": "Add a fallback UI state for when UPI settings are null or empty. When getUpiSettings() returns null, display a user-friendly message such as 'Payment is currently unavailable. Please contact the restaurant.' Include a link or button to return to the menu. Ensure the loading state is handled separately from the missing-settings state. Keep the existing payment flow intact when settings are available."
         }
       ]
     }
