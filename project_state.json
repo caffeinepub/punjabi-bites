@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Project with QR code upload/display functionality, now adding a shopping cart and checkout feature.",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-add-an-add-to-cart-button-on-each-menuitemcard-that-allows-customers-to-add-available-menu-items-to-a-cart-the-cart-should-support-multiple-items-and-track-quantities-sold-out-items-must-not-be-addable-to-the-cart",
+      "title": "Add an 'Add to Cart' button on each MenuItemCard that allows customers to add available menu items to a cart. The cart should support multiple items and track quantities. Sold-out items must not be addable to the cart.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-persistent-cart-sidebar-or-floating-cart-summary-component-on-the-menudisplay-page-that-shows-all-selected-items-their-quantities-individual-prices-and-the-total-order-amount-users-must-be-able-to-increment-decrement-or-remove-items-from-the-cart",
+      "title": "Add a persistent Cart sidebar or floating cart summary component on the MenuDisplay page that shows all selected items, their quantities, individual prices, and the total order amount. Users must be able to increment, decrement, or remove items from the cart.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-checkout-button-in-the-cart-that-when-clicked-opens-the-existing-paymentqrcodemodal-so-the-customer-can-complete-payment-by-scanning-the-qr-code-the-modal-should-display-the-order-summary-items-and-total-alongside-the-qr-code",
+      "title": "Add a 'Checkout' button in the cart that, when clicked, opens the existing PaymentQRCodeModal so the customer can complete payment by scanning the QR code. The modal should display the order summary (items and total) alongside the QR code.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-manage-cart-state-using-react-context-or-a-lightweight-global-state-e-g-react-usestate-lifted-to-the-menudisplay-page-or-a-dedicated-cartcontext-so-cart-data-is-accessible-to-menuitemcard-the-cart-summary-and-the-checkout-modal-without-prop-drilling",
+      "title": "Manage cart state using React context or a lightweight global state (e.g., React useState lifted to the MenuDisplay page or a dedicated CartContext) so cart data is accessible to MenuItemCard, the cart summary, and the checkout modal without prop-drilling.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Add a shopping cart to select multiple items and a checkout option that redirects to payment",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Punjabi Bites",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

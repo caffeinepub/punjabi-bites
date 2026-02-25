@@ -1,0 +1,96 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Add Shopping Cart and Checkout Flow with QR Payment",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Add 'Add to Cart' button to MenuItemCard for available items",
+      "acceptanceCriteria": [
+        "Each available menu item card displays an 'Add to Cart' button",
+        "Clicking the button adds the item to the cart (increments quantity if already present)",
+        "Sold-out items do not show an 'Add to Cart' button or it is disabled",
+        "Cart state persists while the user is on the page"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/MenuItemCard.tsx",
+          "operation": "modify",
+          "description": "Add an 'Add to Cart' button that appears only when the item is available (isAvailable: true). The button should call an addToCart callback passed via props with the menu item. Sold-out items should not display the button or show it in a disabled state. Style the button consistently with the existing saffron/spice theme."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Add persistent Cart sidebar component with item management controls",
+      "acceptanceCriteria": [
+        "Cart panel displays each selected item with name, quantity, and line total",
+        "Cart shows the grand total of all selected items",
+        "Users can increment or decrement item quantity from the cart",
+        "Users can remove an item entirely from the cart",
+        "Cart is visible or easily accessible from the menu page (e.g., floating button with item count badge)"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/CartSidebar.tsx",
+          "operation": "create",
+          "description": "Create a cart sidebar component that displays all cart items with their names, quantities, individual prices, and line totals. Include increment/decrement quantity buttons and a remove button for each item. Show the grand total at the bottom. Include a floating cart icon button with an item count badge to toggle the sidebar visibility. Use the existing design tokens (saffron, deepRed, cream) and ensure the sidebar slides in from the right side. Accept cart state and cart management functions (addItem, removeItem, updateQuantity, clearCart) via props."
+        },
+        {
+          "path": "frontend/src/pages/MenuDisplay.tsx",
+          "operation": "modify",
+          "description": "Wire the CartSidebar component into the MenuDisplay page. Pass cart state and management functions from the CartContext (see REQ-4) to both MenuItemCard components (via the addToCart callback) and the CartSidebar. Ensure the cart sidebar is rendered at the appropriate z-index to overlay the menu content."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Add Checkout button that opens PaymentQRCodeModal with order summary",
+      "acceptanceCriteria": [
+        "Cart contains a clearly visible 'Checkout' button",
+        "Clicking 'Checkout' opens the PaymentQRCodeModal",
+        "The checkout/payment modal displays a summary of the items in the cart and the total amount",
+        "The payment QR code is displayed for the customer to scan",
+        "Checkout button is disabled or hidden when the cart is empty"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/CartSidebar.tsx",
+          "operation": "modify",
+          "description": "Add a 'Checkout' button at the bottom of the cart sidebar (above or near the grand total). The button should be disabled when the cart is empty. When clicked, it should trigger a callback to open the checkout modal. Style the button prominently using the saffron accent color."
+        },
+        {
+          "path": "frontend/src/components/PaymentQRCodeModal.tsx",
+          "operation": "modify",
+          "description": "Extend the PaymentQRCodeModal to accept an optional order summary prop containing cart items and total amount. Display the order summary (list of items with quantities and line totals, plus grand total) above or alongside the QR code in the modal. Ensure the summary is clearly formatted and readable. Maintain the existing QR code fetching and display logic."
+        },
+        {
+          "path": "frontend/src/pages/MenuDisplay.tsx",
+          "operation": "modify",
+          "description": "Add state to control the visibility of the PaymentQRCodeModal. Pass a callback to CartSidebar that opens the modal when the Checkout button is clicked. Pass the current cart items and total to the PaymentQRCodeModal as the order summary prop. Ensure the modal can be closed and that closing it optionally clears the cart (or prompts the user)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Implement CartContext for global cart state management",
+      "acceptanceCriteria": [
+        "Cart state is accessible to all relevant components without excessive prop drilling",
+        "Adding items from any menu category correctly updates the shared cart state",
+        "Cart state resets after the user closes the checkout modal or triggers a clear action"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/contexts/CartContext.tsx",
+          "operation": "create",
+          "description": "Create a CartContext and CartProvider using React Context API. Define cart state as an array of cart items (each containing menuItem reference, quantity). Provide functions: addItem (adds item or increments quantity), removeItem (removes item entirely), updateQuantity (sets quantity for an item), clearCart (empties the cart), and a computed totalAmount. Export useCart hook for consuming the context. Ensure the cart state is held in React useState and is client-side only."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wrap the router tree with the CartProvider so that cart state is available to all routes. Place the CartProvider inside the existing QueryClientProvider and InternetIdentityProvider, wrapping the RouterProvider component."
+        }
+      ]
+    }
+  ]
+}

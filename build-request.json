@@ -1,0 +1,101 @@
+{
+  "kind": "build_request",
+  "title": "Add Shopping Cart and Checkout Flow with QR Payment",
+  "projectName": "Punjabi Bites",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Add an 'Add to Cart' button on each MenuItemCard that allows customers to add available menu items to a cart. The cart should support multiple items and track quantities. Sold-out items must not be addable to the cart.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "add a check out option or a cart to select multiple items"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each available menu item card displays an 'Add to Cart' button",
+        "Clicking the button adds the item to the cart (increments quantity if already present)",
+        "Sold-out items do not show an 'Add to Cart' button or it is disabled",
+        "Cart state persists while the user is on the page"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Add a persistent Cart sidebar or floating cart summary component on the MenuDisplay page that shows all selected items, their quantities, individual prices, and the total order amount. Users must be able to increment, decrement, or remove items from the cart.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "a cart to select multiple items"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Cart panel displays each selected item with name, quantity, and line total",
+        "Cart shows the grand total of all selected items",
+        "Users can increment or decrement item quantity from the cart",
+        "Users can remove an item entirely from the cart",
+        "Cart is visible or easily accessible from the menu page (e.g., floating button with item count badge)"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add a 'Checkout' button in the cart that, when clicked, opens the existing PaymentQRCodeModal so the customer can complete payment by scanning the QR code. The modal should display the order summary (items and total) alongside the QR code.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "check out option",
+          "redirect to payment"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Cart contains a clearly visible 'Checkout' button",
+        "Clicking 'Checkout' opens the PaymentQRCodeModal",
+        "The checkout/payment modal displays a summary of the items in the cart and the total amount",
+        "The payment QR code is displayed for the customer to scan",
+        "Checkout button is disabled or hidden when the cart is empty"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Manage cart state using React context or a lightweight global state (e.g., React useState lifted to the MenuDisplay page or a dedicated CartContext) so cart data is accessible to MenuItemCard, the cart summary, and the checkout modal without prop-drilling.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-7"
+        ],
+        "quotes": [
+          "select multiple items and redirect to payment"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Cart state is accessible to all relevant components without excessive prop drilling",
+        "Adding items from any menu category correctly updates the shared cart state",
+        "Cart state resets after the user closes the checkout modal or triggers a clear action"
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
+    "The payment flow must use the existing PaymentQRCodeModal and its QR code fetching logic — do not introduce a new payment backend",
+    "No backend changes are required for the cart (client-side only)"
+  ],
+  "nonGoals": [
+    "Persisting cart data to the backend or across sessions",
+    "Online payment processing or third-party payment gateway integration",
+    "Order history or receipt generation",
+    "User authentication required for checkout"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}
