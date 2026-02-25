@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { QrCode, X, ShoppingCart } from 'lucide-react';
+import { QrCode, X, ShoppingCart, RefreshCw, AlertCircle } from 'lucide-react';
 import { CartItem } from '../contexts/CartContext';
 
 interface OrderSummary {
@@ -25,7 +25,7 @@ interface PaymentQRCodeModalProps {
 }
 
 export default function PaymentQRCodeModal({ open, onOpenChange, orderSummary }: PaymentQRCodeModalProps) {
-  const { data: qrCode, isLoading } = useGetPaymentQRCode();
+  const { data: qrCode, isLoading, isFetching, error, refetch } = useGetPaymentQRCode();
 
   const hasOrder = orderSummary && orderSummary.items.length > 0;
 
@@ -75,6 +75,24 @@ export default function PaymentQRCodeModal({ open, onOpenChange, orderSummary }:
         <div className="flex flex-col items-center py-2 gap-4">
           {isLoading ? (
             <Skeleton className="w-52 h-52 rounded-xl bg-saffron/10" />
+          ) : error ? (
+            /* Error state with retry */
+            <div className="w-52 h-52 rounded-2xl border-2 border-dashed border-red-200 bg-red-50 flex flex-col items-center justify-center gap-3 px-4">
+              <AlertCircle className="w-10 h-10 text-red-400" />
+              <p className="text-sm text-red-600 text-center font-medium">
+                Failed to load payment QR
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="border-red-200 text-red-600 hover:bg-red-50 gap-1.5 text-xs"
+              >
+                <RefreshCw className={`w-3 h-3 ${isFetching ? 'animate-spin' : ''}`} />
+                {isFetching ? 'Retrying…' : 'Try Again'}
+              </Button>
+            </div>
           ) : qrCode ? (
             <div className="p-3 bg-white rounded-2xl border-2 border-saffron/30 shadow-md">
               <img
@@ -95,7 +113,7 @@ export default function PaymentQRCodeModal({ open, onOpenChange, orderSummary }:
             </div>
           )}
 
-          {qrCode && (
+          {qrCode && !error && (
             <p className="text-xs text-gray-500 text-center max-w-xs">
               Open your UPI / payment app, tap <strong>Scan QR</strong>, and point your camera at the code above.
               {hasOrder && (

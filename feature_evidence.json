@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-an-add-to-cart-button-on-each-menuitemcard-that-allows-customers-to-add-available-menu-items-to-a-cart-the-cart-should-support-multiple-items-and-track-quantities-sold-out-items-must-not-be-addable-to-the-cart",
-      "featureTitle": "Add an 'Add to Cart' button on each MenuItemCard that allows customers to add available menu items to a cart. The cart should support multiple items and track quantities. Sold-out items must not be addable to the cart.",
+      "featureId": "feature-fix-the-intermittent-failure-in-the-food-menu-display-on-menudisplay-tsx-add-robust-error-handling-and-retry-logic-so-that-when-the-menu-items-query-fails-or-returns-empty-a-user-friendly-error-state-with-a-retry-button-is-shown-instead-of-a-blank-screen-or-cryptic-error-message",
+      "featureTitle": "Fix the intermittent failure in the food menu display on MenuDisplay.tsx: add robust error handling and retry logic so that when the menu items query fails or returns empty, a user-friendly error state with a retry button is shown instead of a blank screen or cryptic error message.",
       "files": [
-        "frontend/src/components/MenuItemCard.tsx"
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/MenuDisplay.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -13,7 +14,9 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "camera@1.0.0",
+        "qr-code@1.0.0"
       ],
       "testIds": [
         "REQ-1"
@@ -21,11 +24,12 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-persistent-cart-sidebar-or-floating-cart-summary-component-on-the-menudisplay-page-that-shows-all-selected-items-their-quantities-individual-prices-and-the-total-order-amount-users-must-be-able-to-increment-decrement-or-remove-items-from-the-cart",
-      "featureTitle": "Add a persistent Cart sidebar or floating cart summary component on the MenuDisplay page that shows all selected items, their quantities, individual prices, and the total order amount. Users must be able to increment, decrement, or remove items from the cart.",
+      "featureId": "feature-fix-the-intermittent-failure-in-the-payment-options-display-on-paymentpage-tsx-ensure-the-payment-qr-code-and-payment-options-load-reliably-by-adding-error-boundaries-retry-logic-on-the-usepaymentqrcode-query-and-a-fallback-ui-when-the-qr-code-cannot-be-loaded",
+      "featureTitle": "Fix the intermittent failure in the payment options display on PaymentPage.tsx: ensure the payment QR code and payment options load reliably by adding error boundaries, retry logic on the usePaymentQRCode query, and a fallback UI when the QR code cannot be loaded.",
       "files": [
-        "frontend/src/components/CartSidebar.tsx",
-        "frontend/src/pages/MenuDisplay.tsx"
+        "frontend/src/components/PaymentQRCodeModal.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/PaymentPage.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -33,7 +37,9 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "camera@1.0.0",
+        "qr-code@1.0.0"
       ],
       "testIds": [
         "REQ-2"
@@ -41,12 +47,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-checkout-button-in-the-cart-that-when-clicked-opens-the-existing-paymentqrcodemodal-so-the-customer-can-complete-payment-by-scanning-the-qr-code-the-modal-should-display-the-order-summary-items-and-total-alongside-the-qr-code",
-      "featureTitle": "Add a 'Checkout' button in the cart that, when clicked, opens the existing PaymentQRCodeModal so the customer can complete payment by scanning the QR code. The modal should display the order summary (items and total) alongside the QR code.",
+      "featureId": "feature-add-a-global-error-boundary-component-to-catch-and-display-unhandled-react-rendering-errors-across-all-pages-showing-a-friendly-error-screen-with-a-reload-option-rather-than-a-white-blank-screen",
+      "featureTitle": "Add a global error boundary component to catch and display unhandled React rendering errors across all pages, showing a friendly error screen with a reload option rather than a white blank screen.",
       "files": [
-        "frontend/src/components/CartSidebar.tsx",
-        "frontend/src/components/PaymentQRCodeModal.tsx",
-        "frontend/src/pages/MenuDisplay.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/components/ErrorBoundary.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -54,30 +59,12 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "camera@1.0.0",
+        "qr-code@1.0.0"
       ],
       "testIds": [
         "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-manage-cart-state-using-react-context-or-a-lightweight-global-state-e-g-react-usestate-lifted-to-the-menudisplay-page-or-a-dedicated-cartcontext-so-cart-data-is-accessible-to-menuitemcard-the-cart-summary-and-the-checkout-modal-without-prop-drilling",
-      "featureTitle": "Manage cart state using React context or a lightweight global state (e.g., React useState lifted to the MenuDisplay page or a dedicated CartContext) so cart data is accessible to MenuItemCard, the cart summary, and the checkout modal without prop-drilling.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/contexts/CartContext.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
       ],
       "confidence": "high"
     }

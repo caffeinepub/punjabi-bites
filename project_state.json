@@ -1,49 +1,45 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project with QR code upload/display functionality, now adding a shopping cart and checkout feature.",
+  "summary": "Restaurant app with QR code flow, payment options, and food menu. Currently fixing intermittent 'failed to show menu' error affecting payment options and food menu display.",
   "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Payment options and food menu intermittently fail to load, showing 'failed to show menu' error message"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-add-an-add-to-cart-button-on-each-menuitemcard-that-allows-customers-to-add-available-menu-items-to-a-cart-the-cart-should-support-multiple-items-and-track-quantities-sold-out-items-must-not-be-addable-to-the-cart",
-      "title": "Add an 'Add to Cart' button on each MenuItemCard that allows customers to add available menu items to a cart. The cart should support multiple items and track quantities. Sold-out items must not be addable to the cart.",
+      "id": "feature-fix-the-intermittent-failure-in-the-food-menu-display-on-menudisplay-tsx-add-robust-error-handling-and-retry-logic-so-that-when-the-menu-items-query-fails-or-returns-empty-a-user-friendly-error-state-with-a-retry-button-is-shown-instead-of-a-blank-screen-or-cryptic-error-message",
+      "title": "Fix the intermittent failure in the food menu display on MenuDisplay.tsx: add robust error handling and retry logic so that when the menu items query fails or returns empty, a user-friendly error state with a retry button is shown instead of a blank screen or cryptic error message.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-a-persistent-cart-sidebar-or-floating-cart-summary-component-on-the-menudisplay-page-that-shows-all-selected-items-their-quantities-individual-prices-and-the-total-order-amount-users-must-be-able-to-increment-decrement-or-remove-items-from-the-cart",
-      "title": "Add a persistent Cart sidebar or floating cart summary component on the MenuDisplay page that shows all selected items, their quantities, individual prices, and the total order amount. Users must be able to increment, decrement, or remove items from the cart.",
+      "id": "feature-fix-the-intermittent-failure-in-the-payment-options-display-on-paymentpage-tsx-ensure-the-payment-qr-code-and-payment-options-load-reliably-by-adding-error-boundaries-retry-logic-on-the-usepaymentqrcode-query-and-a-fallback-ui-when-the-qr-code-cannot-be-loaded",
+      "title": "Fix the intermittent failure in the payment options display on PaymentPage.tsx: ensure the payment QR code and payment options load reliably by adding error boundaries, retry logic on the usePaymentQRCode query, and a fallback UI when the QR code cannot be loaded.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-a-checkout-button-in-the-cart-that-when-clicked-opens-the-existing-paymentqrcodemodal-so-the-customer-can-complete-payment-by-scanning-the-qr-code-the-modal-should-display-the-order-summary-items-and-total-alongside-the-qr-code",
-      "title": "Add a 'Checkout' button in the cart that, when clicked, opens the existing PaymentQRCodeModal so the customer can complete payment by scanning the QR code. The modal should display the order summary (items and total) alongside the QR code.",
+      "id": "feature-add-a-global-error-boundary-component-to-catch-and-display-unhandled-react-rendering-errors-across-all-pages-showing-a-friendly-error-screen-with-a-reload-option-rather-than-a-white-blank-screen",
+      "title": "Add a global error boundary component to catch and display unhandled React rendering errors across all pages, showing a friendly error screen with a reload option rather than a white blank screen.",
       "reqIds": [
         "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-manage-cart-state-using-react-context-or-a-lightweight-global-state-e-g-react-usestate-lifted-to-the-menudisplay-page-or-a-dedicated-cartcontext-so-cart-data-is-accessible-to-menuitemcard-the-cart-summary-and-the-checkout-modal-without-prop-drilling",
-      "title": "Manage cart state using React context or a lightweight global state (e.g., React useState lifted to the MenuDisplay page or a dedicated CartContext) so cart data is accessible to MenuItemCard, the cart summary, and the checkout modal without prop-drilling.",
-      "reqIds": [
-        "REQ-4"
       ],
       "version": 1
     }
   ],
   "new_feature_requests": [
     {
-      "id": "AR-1",
-      "summary": "Add a shopping cart to select multiple items and a checkout option that redirects to payment",
-      "reqIds": [],
+      "id": "AR-4",
+      "summary": "Audit the backend Motoko actor's getMenuItems and getPaymentQRCode query functions to ensure they always return a valid, non-error response even under concurrent load or empty state conditions — returning empty arrays or null values rather than trapping.",
+      "reqIds": [
+        "REQ-4"
+      ],
       "status": "pending"
     }
   ],

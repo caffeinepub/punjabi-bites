@@ -4,15 +4,21 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '../contexts/CartContext';
+import { useNavigate } from '@tanstack/react-router';
 
 interface CartSidebarProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCheckout: () => void;
 }
 
-export default function CartSidebar({ open, onOpenChange, onCheckout }: CartSidebarProps) {
+export default function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
   const { cartItems, removeItem, updateQuantity, totalAmount, totalCount } = useCart();
+  const navigate = useNavigate();
+
+  const handleCheckout = () => {
+    onOpenChange(false);
+    navigate({ to: '/payment' });
+  };
 
   return (
     <>
@@ -153,7 +159,7 @@ export default function CartSidebar({ open, onOpenChange, onCheckout }: CartSide
               <Separator className="mb-4 bg-saffron/15" />
 
               <Button
-                onClick={onCheckout}
+                onClick={handleCheckout}
                 disabled={cartItems.length === 0}
                 className="w-full bg-saffron hover:bg-saffron/90 text-deepRed font-bold text-base py-5 rounded-xl shadow-md gap-2"
               >

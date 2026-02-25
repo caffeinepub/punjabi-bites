@@ -4,12 +4,10 @@ import { useGetMenuItems, useIsAdmin } from '../hooks/useQueries';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { MenuItem, Category } from '../backend';
 import MenuItemCard from '../components/MenuItemCard';
-import PaymentQRCodeModal from '../components/PaymentQRCodeModal';
 import CartSidebar from '../components/CartSidebar';
-import { useCart } from '../contexts/CartContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import { UtensilsCrossed, Settings, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { UtensilsCrossed, Settings, RefreshCw, AlertCircle } from 'lucide-react';
 
 const CATEGORY_ORDER: Category[] = [
   Category.appetizer,
@@ -80,15 +78,36 @@ function LoadingSkeleton() {
   );
 }
 
+function MenuErrorState({ onRetry, isRetrying }: { onRetry: () => void; isRetrying: boolean }) {
+  return (
+    <div className="text-center py-20 bg-white rounded-2xl border border-red-100">
+      <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-5">
+        <AlertCircle className="w-10 h-10 text-red-400" />
+      </div>
+      <h2 className="font-display text-2xl font-black text-deepRed mb-2">
+        Couldn't Load Menu
+      </h2>
+      <p className="text-gray-500 text-sm max-w-xs mx-auto mb-6">
+        We had trouble fetching the menu. This is usually temporary — please try again.
+      </p>
+      <Button
+        onClick={onRetry}
+        disabled={isRetrying}
+        className="bg-deepRed hover:bg-deepRed/90 text-white gap-2 font-semibold"
+      >
+        <RefreshCw className={`w-4 h-4 ${isRetrying ? 'animate-spin' : ''}`} />
+        {isRetrying ? 'Loading…' : 'Try Again'}
+      </Button>
+    </div>
+  );
+}
+
 export default function MenuDisplay() {
-  const { data: menuItems, isLoading, error } = useGetMenuItems();
+  const { data: menuItems, isLoading, isFetching, error, refetch } = useGetMenuItems();
   const { identity } = useInternetIdentity();
   const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
   const isAuthenticated = !!identity;
-  const [qrModalOpen, setQrModalOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-
-  const { cartItems, totalAmount, clearCart } = useCart();
 
   const showAdminCTA = isAuthenticated && !isAdminLoading && isAdmin === true;
 
@@ -103,19 +122,6 @@ export default function MenuDisplay() {
   }, [menuItems]);
 
   const hasItems = menuItems && menuItems.length > 0;
-
-  const handleCheckout = () => {
-    setCartOpen(false);
-    setQrModalOpen(true);
-  };
-
-  const handleQrModalClose = (open: boolean) => {
-    setQrModalOpen(open);
-    // Clear cart when modal is closed after checkout
-    if (!open && cartItems.length > 0) {
-      clearCart();
-    }
-  };
 
   return (
     <div>
@@ -138,20 +144,10 @@ export default function MenuDisplay() {
         </div>
       </div>
 
-      {/* Action Bar — Pay QR + Admin CTA */}
-      <div className="bg-white border-b border-saffron/15 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3 flex-wrap">
-          {/* Pay via QR Code button — always visible */}
-          <Button
-            onClick={() => setQrModalOpen(true)}
-            className="bg-deepRed hover:bg-deepRed/90 text-cream font-bold gap-2 shadow-sm"
-          >
-            <QrCode className="w-4 h-4" />
-            Pay via QR Code
-          </Button>
-
-          {/* Admin CTA */}
-          {showAdminCTA && (
+      {/* Action Bar — Admin CTA */}
+      {showAdminCTA && (
+        <div className="bg-white border-b border-saffron/15 shadow-sm">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-end gap-3">
             <Link to="/admin">
               <Button
                 variant="outline"
@@ -161,9 +157,9 @@ export default function MenuDisplay() {
                 Manage Menu
               </Button>
             </Link>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
@@ -186,10 +182,8 @@ export default function MenuDisplay() {
         {isLoading && <LoadingSkeleton />}
 
         {/* Error */}
-        {error && (
-          <div className="text-center py-16">
-            <p className="text-red-500 font-medium">Failed to load menu. Please try again.</p>
-          </div>
+        {!isLoading && error && (
+          <MenuErrorState onRetry={refetch} isRetrying={isFetching} />
         )}
 
         {/* Empty state */}
@@ -219,19 +213,8 @@ export default function MenuDisplay() {
         )}
       </main>
 
-      {/* Cart Sidebar (includes floating button) */}
-      <CartSidebar
-        open={cartOpen}
-        onOpenChange={setCartOpen}
-        onCheckout={handleCheckout}
-      />
-
-      {/* Payment QR Code Modal */}
-      <PaymentQRCodeModal
-        open={qrModalOpen}
-        onOpenChange={handleQrModalClose}
-        orderSummary={cartItems.length > 0 ? { items: cartItems, total: totalAmount } : undefined}
-      />
+      {/* Cart Sidebar */}
+      <CartSidebar open={cartOpen} onOpenChange={setCartOpen} />
     </div>
   );
 }

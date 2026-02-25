@@ -1,66 +1,62 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T06:41:59.379Z",
+  "generatedAt": "2026-02-25T12:45:28.890Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 4,
-    "implemented": 4,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add an 'Add to Cart' button on each MenuItemCard that allows customers to add available menu items to a cart. The cart should support multiple items and track quantities. Sold-out items must not be addable to the cart.",
+        "summary": "Fix the intermittent failure in the food menu display on MenuDisplay.tsx: add robust error handling and retry logic so that when the menu items query fails or returns empty, a user-friendly error state with a retry button is shown instead of a blank screen or cryptic error message.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/MenuItemCard.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/MenuDisplay.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/MenuItemCard.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/MenuDisplay.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Add a persistent Cart sidebar or floating cart summary component on the MenuDisplay page that shows all selected items, their quantities, individual prices, and the total order amount. Users must be able to increment, decrement, or remove items from the cart.",
+        "summary": "Fix the intermittent failure in the payment options display on PaymentPage.tsx: ensure the payment QR code and payment options load reliably by adding error boundaries, retry logic on the usePaymentQRCode query, and a fallback UI when the QR code cannot be loaded.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/CartSidebar.tsx",
-          "frontend/src/pages/MenuDisplay.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/PaymentPage.tsx",
+          "frontend/src/components/PaymentQRCodeModal.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/CartSidebar.tsx",
-          "frontend/src/pages/MenuDisplay.tsx"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/PaymentPage.tsx",
+          "frontend/src/components/PaymentQRCodeModal.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Add a 'Checkout' button in the cart that, when clicked, opens the existing PaymentQRCodeModal so the customer can complete payment by scanning the QR code. The modal should display the order summary (items and total) alongside the QR code.",
+        "summary": "Add a global error boundary component to catch and display unhandled React rendering errors across all pages, showing a friendly error screen with a reload option rather than a white blank screen.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/CartSidebar.tsx",
-          "frontend/src/components/PaymentQRCodeModal.tsx",
-          "frontend/src/pages/MenuDisplay.tsx"
+          "frontend/src/components/ErrorBoundary.tsx",
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/CartSidebar.tsx",
-          "frontend/src/components/PaymentQRCodeModal.tsx",
-          "frontend/src/pages/MenuDisplay.tsx"
+          "frontend/src/components/ErrorBoundary.tsx",
+          "frontend/src/App.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Manage cart state using React context or a lightweight global state (e.g., React useState lifted to the MenuDisplay page or a dedicated CartContext) so cart data is accessible to MenuItemCard, the cart summary, and the checkout modal without prop-drilling.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/contexts/CartContext.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/contexts/CartContext.tsx",
-          "frontend/src/App.tsx"
-        ]
+        "summary": "Audit the backend Motoko actor's getMenuItems and getPaymentQRCode query functions to ensure they always return a valid, non-error response even under concurrent load or empty state conditions — returning empty arrays or null values rather than trapping.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       }
     ]
   },
@@ -70,11 +66,11 @@
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/App.tsx",
-    "frontend/src/components/CartSidebar.tsx",
-    "frontend/src/components/MenuItemCard.tsx",
+    "frontend/src/components/ErrorBoundary.tsx",
     "frontend/src/components/PaymentQRCodeModal.tsx",
-    "frontend/src/contexts/CartContext.tsx",
+    "frontend/src/hooks/useQueries.ts",
     "frontend/src/pages/MenuDisplay.tsx",
+    "frontend/src/pages/PaymentPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

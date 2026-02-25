@@ -1,15 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Add a shopping cart and checkout flow to the Punjabi Bites menu page, allowing customers to select multiple items and pay via QR code.
+**Goal:** Fix intermittent "failed to show menu" and payment options errors in the Punjabi Bites app by adding robust error handling, retry logic, and a global error boundary.
 
 **Planned changes:**
-- Add an "Add to Cart" button on each available MenuItemCard (disabled/hidden for sold-out items)
-- Create a CartContext (or lifted state) to manage cart state across components without prop-drilling
-- Add a persistent floating cart summary component showing selected items, quantities, line totals, and grand total
-- Allow users to increment, decrement, or remove items from the cart
-- Add a "Checkout" button in the cart that opens the existing PaymentQRCodeModal with order summary and QR code
-- Disable the Checkout button when the cart is empty
-- Reset cart state after the checkout modal is closed
+- Add retry logic (at least 3 retries with backoff) to the React Query hook for menu items in `MenuDisplay.tsx`, and show a user-friendly error state with a "Try Again" button and loading skeleton when data fails to load
+- Add retry logic to the React Query hook for the payment QR code in `PaymentPage.tsx`, and show a fallback error UI with a retry button when the QR code or payment options fail to load; handle loading and error states in `PaymentQRCodeModal` as well
+- Add a global React error boundary component wrapping main route content in `App.tsx` that displays a branded error screen with a "Reload" button on unhandled rendering errors
+- Audit and fix the backend Motoko `getMenuItems` and `getPaymentQRCode` query functions to always return valid responses (empty array or null) without trapping under concurrent load or empty state conditions
 
-**User-visible outcome:** Customers can add multiple menu items to a cart, review their order with a running total, and proceed to checkout where a QR code is displayed for payment.
+**User-visible outcome:** The food menu and payment options load reliably on repeated visits; when a transient failure occurs, users see a clear error message with a retry option instead of a blank screen or cryptic error.

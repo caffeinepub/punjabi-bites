@@ -3,7 +3,10 @@ import { Toaster } from '@/components/ui/sonner';
 import Layout from './components/Layout';
 import MenuDisplay from './pages/MenuDisplay';
 import AdminPanel from './pages/AdminPanel';
+import PaymentPage from './pages/PaymentPage';
+import OrderReceiptPage from './pages/OrderReceiptPage';
 import { CartProvider } from './contexts/CartContext';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -28,7 +31,19 @@ const adminRoute = createRoute({
   component: AdminPanel,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, adminRoute]);
+const paymentRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/payment',
+  component: PaymentPage,
+});
+
+const receiptRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/receipt',
+  component: OrderReceiptPage,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, adminRoute, paymentRoute, receiptRoute]);
 
 const router = createRouter({ routeTree });
 
@@ -40,8 +55,10 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <CartProvider>
-      <RouterProvider router={router} />
-    </CartProvider>
+    <ErrorBoundary>
+      <CartProvider>
+        <RouterProvider router={router} />
+      </CartProvider>
+    </ErrorBoundary>
   );
 }

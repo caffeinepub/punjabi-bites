@@ -16,6 +16,9 @@ export function useGetMenuItems() {
     },
     enabled: !!actor && !isFetching,
     refetchInterval: 30_000,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30_000),
+    staleTime: 10_000,
   });
 }
 
@@ -50,6 +53,10 @@ export function useGetPaymentQRCode() {
       return actor.getPaymentQRCode();
     },
     enabled: !!actor && !isFetching,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30_000),
+    staleTime: 15_000,
+    gcTime: 60_000,
   });
 }
 
