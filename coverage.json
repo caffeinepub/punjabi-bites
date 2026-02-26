@@ -1,7 +1,7 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T04:50:25.306Z",
+  "generatedAt": "2026-02-26T04:56:35.157Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
@@ -12,7 +12,7 @@
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the UPI payment deep links in UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx so that clicking GPay, PhonePe, and Paytm buttons opens the correct respective payment app (GPay, PhonePe, Paytm) instead of WhatsApp. Use the correct platform-specific UPI URI schemes: 'tez://upi/pay?' for GPay, 'phonepe://pay?' for PhonePe, and 'paytmmp://pay?' for Paytm. Do not change any other UI, layout, or functionality.",
+        "summary": "Revert the project to Version 27, undoing all changes introduced in Version 28. This includes reverting any modifications made to UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx as part of the Version 28 UPI deep link fix.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/components/UpiPaymentButtons.tsx",
@@ -26,9 +26,8 @@
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
-    "build-template/README.md",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",

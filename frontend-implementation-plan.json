@@ -1,28 +1,26 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix UPI payment deep links to open correct payment apps",
+  "title": "Revert to Version 27",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Fix the UPI payment deep links in UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx so that clicking GPay, PhonePe, and Paytm buttons opens the correct respective payment app instead of WhatsApp",
+      "summary": "Revert all Version 28 changes to UPI payment components, restoring the Version 27 implementation",
       "acceptanceCriteria": [
-        "Clicking the GPay button opens the GPay app (or GPay's UPI deep link URL) and does not open WhatsApp",
-        "Clicking the PhonePe button opens the PhonePe app (or PhonePe's UPI deep link URL) and does not open WhatsApp",
-        "Clicking the Paytm button opens the Paytm app (or Paytm's UPI deep link URL) and does not open WhatsApp",
-        "No other UI components, pages, or functionality are changed",
-        "The fix applies to both UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx if both build deep links"
+        "All frontend files reflect the state of Version 27",
+        "Changes introduced in Version 28 (UPI deep link updates in UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx) are no longer present",
+        "The application builds and runs successfully at the Version 27 state"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/UpiPaymentButtons.tsx",
           "operation": "modify",
-          "description": "Update the UPI deep link URL construction to use the correct platform-specific URI schemes: 'tez://upi/pay?' for GPay, 'phonepe://pay?' for PhonePe, and 'paytmmp://pay?' for Paytm. Replace any incorrect URL schemes that are currently causing WhatsApp to open. Preserve all other functionality, UI layout, and styling."
+          "description": "Revert UpiPaymentButtons component to Version 27 implementation, removing any Version 28 deep link fixes or enhancements. Restore the original UPI payment button behavior and link generation logic that existed in Version 27."
         },
         {
           "path": "frontend/src/components/UpiPaymentOptionsModal.tsx",
           "operation": "modify",
-          "description": "Update the UPI deep link URL construction to use the correct platform-specific URI schemes: 'tez://upi/pay?' for GPay, 'phonepe://pay?' for PhonePe, and 'paytmmp://pay?' for Paytm. Replace any incorrect URL schemes that are currently causing WhatsApp to open. Preserve all other functionality, UI layout, modal behavior, and styling."
+          "description": "Revert UpiPaymentOptionsModal component to Version 27 implementation, removing any Version 28 deep link updates. Restore the original modal behavior, UPI option handling, and payment flow that existed in Version 27."
         }
       ]
     }

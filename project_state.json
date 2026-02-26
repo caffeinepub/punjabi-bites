@@ -1,16 +1,14 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "App with payment integration (GPay, PhonePe, Paytm) where clicking payment was incorrectly opening WhatsApp instead of the payment apps.",
+  "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [
-    "Payment button incorrectly opens WhatsApp instead of GPay/PhonePe/Paytm"
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-fix-the-upi-payment-deep-links-in-upipaymentbuttons-tsx-and-upipaymentoptionsmodal-tsx-so-that-clicking-gpay-phonepe-and-paytm-buttons-opens-the-correct-respective-payment-app-gpay-phonepe-paytm-instead-of-whatsapp-use-the-correct-platform-specific-upi-uri-schemes-tez-upi-pay-for-gpay-phonepe-pay-for-phonepe-and-paytmmp-pay-for-paytm-do-not-change-any-other-ui-layout-or-functionality",
-      "title": "Fix the UPI payment deep links in UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx so that clicking GPay, PhonePe, and Paytm buttons opens the correct respective payment app (GPay, PhonePe, Paytm) instead of WhatsApp. Use the correct platform-specific UPI URI schemes: 'tez://upi/pay?' for GPay, 'phonepe://pay?' for PhonePe, and 'paytmmp://pay?' for Paytm. Do not change any other UI, layout, or functionality.",
+      "id": "feature-revert-the-project-to-version-27-undoing-all-changes-introduced-in-version-28-this-includes-reverting-any-modifications-made-to-upipaymentbuttons-tsx-and-upipaymentoptionsmodal-tsx-as-part-of-the-version-28-upi-deep-link-fix",
+      "title": "Revert the project to Version 27, undoing all changes introduced in Version 28. This includes reverting any modifications made to UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx as part of the Version 28 UPI deep link fix.",
       "reqIds": [
         "REQ-1"
       ],
@@ -18,7 +16,7 @@
     }
   ],
   "new_feature_requests": [],
-  "projectName": "Punjabi Bites",
+  "projectName": "Revert to Version 27",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

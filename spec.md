@@ -1,10 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Fix UPI payment deep links so that clicking GPay, PhonePe, and Paytm buttons opens the correct respective payment app instead of WhatsApp.
+**Goal:** Revert the project to Version 27, undoing all changes introduced in Version 28.
 
 **Planned changes:**
-- Update `UpiPaymentButtons.tsx` to use correct UPI URI schemes: `tez://upi/pay?` for GPay, `phonepe://pay?` for PhonePe, and `paytmmp://pay?` for Paytm
-- Update `UpiPaymentOptionsModal.tsx` with the same corrected URI schemes if it also builds deep links
+- Revert `UpiPaymentButtons.tsx` to its Version 27 state
+- Revert `UpiPaymentOptionsModal.tsx` to its Version 27 state
+- Revert any other frontend and backend changes introduced in Version 28
 
-**User-visible outcome:** Clicking GPay, PhonePe, or Paytm payment buttons now opens the correct payment app instead of WhatsApp.
+**User-visible outcome:** The application runs as it did in Version 27, with no Version 28 UPI deep link changes present.
