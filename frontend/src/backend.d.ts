@@ -17,9 +17,6 @@ export interface MenuItem {
     price: number;
 }
 export type MenuItemId = bigint;
-export interface UserProfile {
-    name: string;
-}
 export interface UpiSettings {
     merchantName: string;
     qrCodeData: string;
@@ -40,13 +37,10 @@ export interface backendInterface {
     addMenuItem(name: string, description: string, price: number, category: Category, imageUrl: string | null): Promise<MenuItemId>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     deleteMenuItem(id: MenuItemId): Promise<void>;
-    getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getMenuItems(): Promise<Array<MenuItem>>;
     getUpiSettings(): Promise<UpiSettings | null>;
-    getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
-    saveCallerUserProfile(profile: UserProfile): Promise<void>;
     toggleAvailability(id: MenuItemId): Promise<void>;
     updateMenuItem(id: MenuItemId, name: string, description: string, price: number, category: Category, imageUrl: string | null): Promise<void>;
     updateUpiSettings(newSettings: UpiSettings): Promise<void>;

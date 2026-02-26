@@ -31,7 +31,6 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 export const MenuItem = IDL.Record({
   'id' : MenuItemId,
   'name' : IDL.Text,
@@ -82,17 +81,10 @@ export const idlService = IDL.Service({
     ),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'deleteMenuItem' : IDL.Func([MenuItemId], [], []),
-  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getMenuItems' : IDL.Func([], [IDL.Vec(MenuItem)], ['query']),
   'getUpiSettings' : IDL.Func([], [IDL.Opt(UpiSettings)], ['query']),
-  'getUserProfile' : IDL.Func(
-      [IDL.Principal],
-      [IDL.Opt(UserProfile)],
-      ['query'],
-    ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'toggleAvailability' : IDL.Func([MenuItemId], [], []),
   'updateMenuItem' : IDL.Func(
       [
@@ -135,7 +127,6 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const UserProfile = IDL.Record({ 'name' : IDL.Text });
   const MenuItem = IDL.Record({
     'id' : MenuItemId,
     'name' : IDL.Text,
@@ -186,17 +177,10 @@ export const idlFactory = ({ IDL }) => {
       ),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'deleteMenuItem' : IDL.Func([MenuItemId], [], []),
-    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getMenuItems' : IDL.Func([], [IDL.Vec(MenuItem)], ['query']),
     'getUpiSettings' : IDL.Func([], [IDL.Opt(UpiSettings)], ['query']),
-    'getUserProfile' : IDL.Func(
-        [IDL.Principal],
-        [IDL.Opt(UserProfile)],
-        ['query'],
-      ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'toggleAvailability' : IDL.Func([MenuItemId], [], []),
     'updateMenuItem' : IDL.Func(
         [

@@ -1,10 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Fix the Pay Now button visibility in CartSidebar and add a fallback message on PaymentPage when UPI settings are missing.
+**Goal:** Fix UPI payment deep links so that clicking GPay, PhonePe, and Paytm buttons opens the correct respective payment app instead of WhatsApp.
 
 **Planned changes:**
-- Fix the Pay Now button in CartSidebar so it is visible and functional on all devices (mobile and desktop) when the cart contains at least one item, resolving any CSS, conditional rendering, z-index, or overflow issues hiding it.
-- Audit the PaymentPage UPI settings fetch and display a user-friendly fallback message (e.g., "Payment is currently unavailable. Please contact the restaurant.") when UPI settings are missing or empty, instead of a blank or broken UI.
+- Update `UpiPaymentButtons.tsx` to use correct UPI URI schemes: `tez://upi/pay?` for GPay, `phonepe://pay?` for PhonePe, and `paytmmp://pay?` for Paytm
+- Update `UpiPaymentOptionsModal.tsx` with the same corrected URI schemes if it also builds deep links
 
-**User-visible outcome:** Users can see and tap the Pay Now button in the cart on all devices, and will see a clear message if payment is currently unavailable rather than a blank screen.
+**User-visible outcome:** Clicking GPay, PhonePe, or Paytm payment buttons now opens the correct payment app instead of WhatsApp.

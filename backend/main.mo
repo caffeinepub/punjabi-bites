@@ -1,13 +1,10 @@
 import Map "mo:core/Map";
 import Iter "mo:core/Iter";
-import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import MixinStorage "blob-storage/Mixin";
-
-
 
 actor {
   type MenuItemId = Nat;
@@ -29,10 +26,6 @@ actor {
     imageUrl : ?Text;
   };
 
-  public type UserProfile = {
-    name : Text;
-  };
-
   public type UpiSettings = {
     upiId : Text;
     merchantName : Text;
@@ -42,7 +35,6 @@ actor {
   let menuItems = Map.empty<MenuItemId, MenuItem>();
   var nextMenuItemId = 1;
 
-  let userProfiles = Map.empty<Principal, UserProfile>();
   var upiSettings : ?UpiSettings = null;
 
   let accessControlState = AccessControl.initState();
@@ -50,28 +42,13 @@ actor {
   include MixinStorage();
   include MixinAuthorization(accessControlState);
 
-  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can get profiles");
-    };
-    userProfiles.get(caller);
-  };
-
-  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Can only view your own profile");
-    };
-    userProfiles.get(user);
-  };
-
-  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
-    };
-    userProfiles.add(caller, profile);
-  };
-
-  public shared ({ caller }) func addMenuItem(name : Text, description : Text, price : Float, category : Category, imageUrl : ?Text) : async MenuItemId {
+  public shared ({ caller }) func addMenuItem(
+    name : Text,
+    description : Text,
+    price : Float,
+    category : Category,
+    imageUrl : ?Text,
+  ) : async MenuItemId {
     if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can add menu items");
     };
@@ -93,7 +70,14 @@ actor {
     menuItemId;
   };
 
-  public shared ({ caller }) func updateMenuItem(id : MenuItemId, name : Text, description : Text, price : Float, category : Category, imageUrl : ?Text) : async () {
+  public shared ({ caller }) func updateMenuItem(
+    id : MenuItemId,
+    name : Text,
+    description : Text,
+    price : Float,
+    category : Category,
+    imageUrl : ?Text,
+  ) : async () {
     if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can update menu items");
     };
@@ -130,7 +114,9 @@ actor {
   };
 
   public query ({ caller }) func getMenuItems() : async [MenuItem] {
-    menuItems.values().toArray();
+    let itemsArray = menuItems.values().toArray();
+    let filteredItems = itemsArray.filter(func(item) { item.isAvailable });
+    filteredItems;
   };
 
   public shared ({ caller }) func toggleAvailability(id : MenuItemId) : async () {
@@ -157,7 +143,6 @@ actor {
     };
   };
 
-  // Admin-only: Update UPI settings
   public shared ({ caller }) func updateUpiSettings(newSettings : UpiSettings) : async () {
     if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Admins only");
@@ -165,7 +150,6 @@ actor {
     upiSettings := ?newSettings;
   };
 
-  // Public: Get current UPI settings
   public query ({ caller }) func getUpiSettings() : async ?UpiSettings {
     upiSettings;
   };

@@ -1,46 +1,39 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T17:42:10.061Z",
+  "generatedAt": "2026-02-26T04:50:25.306Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the Pay Now button in CartSidebar so it is visible and functional on all devices, including mobile. The button should appear in the cart panel when items are in the cart and trigger the UPI deep link flow. Ensure it is not hidden by CSS, conditional rendering logic, or z-index/overflow issues.",
+        "summary": "Fix the UPI payment deep links in UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx so that clicking GPay, PhonePe, and Paytm buttons opens the correct respective payment app (GPay, PhonePe, Paytm) instead of WhatsApp. Use the correct platform-specific UPI URI schemes: 'tez://upi/pay?' for GPay, 'phonepe://pay?' for PhonePe, and 'paytmmp://pay?' for Paytm. Do not change any other UI, layout, or functionality.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/CartSidebar.tsx"
+          "frontend/src/components/UpiPaymentButtons.tsx",
+          "frontend/src/components/UpiPaymentOptionsModal.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/CartSidebar.tsx"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Audit the PaymentPage UPI settings fetch: if UPI settings are missing or empty, display a user-friendly fallback message instead of a blank or broken payment UI, so users always understand the payment state.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/PaymentPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/PaymentPage.tsx"
+          "frontend/src/components/UpiPaymentButtons.tsx",
+          "frontend/src/components/UpiPaymentOptionsModal.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
     "build-request.json",
+    "build-template/README.md",
+    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/CartSidebar.tsx",
-    "frontend/src/pages/PaymentPage.tsx",
+    "frontend/src/components/UpiPaymentButtons.tsx",
+    "frontend/src/components/UpiPaymentOptionsModal.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

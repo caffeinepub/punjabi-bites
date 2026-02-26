@@ -29,7 +29,6 @@ export interface UpiSettings {
   'qrCodeData' : string,
   'upiId' : string,
 }
-export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -67,13 +66,10 @@ export interface _SERVICE {
   >,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'deleteMenuItem' : ActorMethod<[MenuItemId], undefined>,
-  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getMenuItems' : ActorMethod<[], Array<MenuItem>>,
   'getUpiSettings' : ActorMethod<[], [] | [UpiSettings]>,
-  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
-  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'toggleAvailability' : ActorMethod<[MenuItemId], undefined>,
   'updateMenuItem' : ActorMethod<
     [MenuItemId, string, string, number, Category, [] | [string]],

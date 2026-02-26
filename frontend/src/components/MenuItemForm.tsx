@@ -1,11 +1,9 @@
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { MenuItem, Category } from '../backend';
-import { useAddMenuItem, useUpdateMenuItem } from '../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -14,9 +12,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 
-interface FormValues {
+interface MenuItemFormData {
   name: string;
   description: string;
   price: string;
@@ -25,164 +22,159 @@ interface FormValues {
 }
 
 interface MenuItemFormProps {
-  item?: MenuItem;
-  onSuccess: () => void;
+  initialData?: MenuItem;
+  onSubmit: (data: {
+    name: string;
+    description: string;
+    price: number;
+    category: Category;
+    imageUrl: string | null;
+  }) => Promise<void>;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
-export default function MenuItemForm({ item, onSuccess, onCancel }: MenuItemFormProps) {
-  const isEdit = !!item;
-  const addMutation = useAddMenuItem();
-  const updateMutation = useUpdateMenuItem();
-  const isPending = addMutation.isPending || updateMutation.isPending;
-
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<FormValues>({
+export default function MenuItemForm({
+  initialData,
+  onSubmit,
+  onCancel,
+  isLoading = false,
+}: MenuItemFormProps) {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<MenuItemFormData>({
     defaultValues: {
-      name: item?.name ?? '',
-      description: item?.description ?? '',
-      price: item?.price?.toString() ?? '',
-      category: item?.category ?? Category.mainCourse,
-      imageUrl: item?.imageUrl ?? '',
+      name: initialData?.name ?? '',
+      description: initialData?.description ?? '',
+      price: initialData?.price?.toString() ?? '',
+      category: initialData?.category ?? Category.mainCourse,
+      imageUrl: initialData?.imageUrl ?? '',
     },
   });
 
   const selectedCategory = watch('category');
 
-  useEffect(() => {
-    if (item) {
-      reset({
-        name: item.name,
-        description: item.description,
-        price: item.price.toString(),
-        category: item.category,
-        imageUrl: item.imageUrl ?? '',
-      });
-    }
-  }, [item, reset]);
-
-  const onSubmit = async (data: FormValues) => {
-    const price = parseFloat(data.price);
-    if (isNaN(price) || price < 0) {
-      toast.error('Please enter a valid price');
-      return;
-    }
-    const imageUrlValue = data.imageUrl.trim() || null;
-
-    try {
-      if (isEdit && item) {
-        await updateMutation.mutateAsync({
-          id: item.id,
-          name: data.name.trim(),
-          description: data.description.trim(),
-          price,
-          category: data.category,
-          imageUrl: imageUrlValue,
-        });
-        toast.success('Menu item updated!');
-      } else {
-        await addMutation.mutateAsync({
-          name: data.name.trim(),
-          description: data.description.trim(),
-          price,
-          category: data.category,
-          imageUrl: imageUrlValue,
-        });
-        toast.success('Menu item added!');
-      }
-      onSuccess();
-    } catch (err) {
-      toast.error('Failed to save menu item. Please try again.');
-    }
+  const handleFormSubmit = async (data: MenuItemFormData) => {
+    await onSubmit({
+      name: data.name,
+      description: data.description,
+      price: parseFloat(data.price),
+      category: data.category,
+      imageUrl: data.imageUrl.trim() || null,
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {/* Name */}
-      <div className="space-y-1.5">
-        <Label htmlFor="name" className="text-deepRed font-semibold">Item Name *</Label>
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+      <div>
+        <Label htmlFor="name" className="text-deepRed-700 font-medium">
+          Item Name *
+        </Label>
         <Input
           id="name"
-          placeholder="e.g. Butter Chicken"
-          className="border-saffron/30 focus:border-saffron"
           {...register('name', { required: 'Name is required' })}
+          placeholder="e.g. Butter Chicken"
+          className="mt-1 border-cream-300 focus:border-saffron-400"
         />
-        {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
+        {errors.name && (
+          <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+        )}
       </div>
 
-      {/* Description */}
-      <div className="space-y-1.5">
-        <Label htmlFor="description" className="text-deepRed font-semibold">Description</Label>
+      <div>
+        <Label htmlFor="description" className="text-deepRed-700 font-medium">
+          Description *
+        </Label>
         <Textarea
           id="description"
+          {...register('description', { required: 'Description is required' })}
           placeholder="Describe the dish..."
           rows={3}
-          className="border-saffron/30 focus:border-saffron resize-none"
-          {...register('description')}
+          className="mt-1 border-cream-300 focus:border-saffron-400"
         />
+        {errors.description && (
+          <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
+        )}
       </div>
 
-      {/* Price & Category */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="price" className="text-deepRed font-semibold">Price (₹) *</Label>
-          <Input
-            id="price"
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="0.00"
-            className="border-saffron/30 focus:border-saffron"
-            {...register('price', { required: 'Price is required' })}
-          />
-          {errors.price && <p className="text-red-500 text-xs">{errors.price.message}</p>}
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="text-deepRed font-semibold">Category *</Label>
-          <Select
-            value={selectedCategory}
-            onValueChange={(val) => setValue('category', val as Category)}
-          >
-            <SelectTrigger className="border-saffron/30 focus:border-saffron">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={Category.appetizer}>🥗 Appetizer</SelectItem>
-              <SelectItem value={Category.mainCourse}>🍛 Main Course</SelectItem>
-              <SelectItem value={Category.dessert}>🍮 Dessert</SelectItem>
-              <SelectItem value={Category.beverage}>🥤 Beverage</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      <div>
+        <Label htmlFor="price" className="text-deepRed-700 font-medium">
+          Price (₹) *
+        </Label>
+        <Input
+          id="price"
+          type="number"
+          step="0.01"
+          min="0"
+          {...register('price', {
+            required: 'Price is required',
+            min: { value: 0, message: 'Price must be positive' },
+          })}
+          placeholder="e.g. 250.00"
+          className="mt-1 border-cream-300 focus:border-saffron-400"
+        />
+        {errors.price && (
+          <p className="text-red-500 text-xs mt-1">{errors.price.message}</p>
+        )}
       </div>
 
-      {/* Image URL */}
-      <div className="space-y-1.5">
-        <Label htmlFor="imageUrl" className="text-deepRed font-semibold">Image URL</Label>
+      <div>
+        <Label className="text-deepRed-700 font-medium">Category *</Label>
+        <Select
+          value={selectedCategory}
+          onValueChange={(val) => setValue('category', val as Category)}
+        >
+          <SelectTrigger className="mt-1 border-cream-300 focus:border-saffron-400">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={Category.appetizer}>Appetizer</SelectItem>
+            <SelectItem value={Category.mainCourse}>Main Course</SelectItem>
+            <SelectItem value={Category.dessert}>Dessert</SelectItem>
+            <SelectItem value={Category.beverage}>Beverage</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label htmlFor="imageUrl" className="text-deepRed-700 font-medium">
+          Image URL (optional)
+        </Label>
         <Input
           id="imageUrl"
-          placeholder="https://example.com/image.jpg"
-          className="border-saffron/30 focus:border-saffron"
           {...register('imageUrl')}
+          placeholder="https://example.com/image.jpg"
+          className="mt-1 border-cream-300 focus:border-saffron-400"
         />
       </div>
 
-      {/* Actions */}
       <div className="flex gap-3 pt-2">
         <Button
           type="submit"
-          disabled={isPending}
-          className="flex-1 bg-saffron hover:bg-saffron/90 text-deepRed font-bold gap-2"
+          disabled={isLoading}
+          className="flex-1 bg-saffron-500 hover:bg-saffron-400 text-deepRed-900 font-semibold"
         >
-          {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-          {isEdit ? 'Update Item' : 'Add Item'}
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Saving...
+            </>
+          ) : initialData ? (
+            'Update Item'
+          ) : (
+            'Add Item'
+          )}
         </Button>
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
-          disabled={isPending}
-          className="flex-1 border-deepRed/30 text-deepRed hover:bg-deepRed/5"
+          disabled={isLoading}
+          className="flex-1 border-deepRed-300 text-deepRed-600 hover:bg-deepRed-50"
         >
           Cancel
         </Button>

@@ -1,29 +1,28 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import {
   useIsAdmin,
   useGetMenuItems,
+  useAddMenuItem,
+  useUpdateMenuItem,
   useDeleteMenuItem,
   useToggleAvailability,
-  useUPISettings,
-  useUpdateUPISettings,
+  useGetUpiSettings,
+  useUpdateUpiSettings,
 } from '../hooks/useQueries';
-import { useActor } from '../hooks/useActor';
 import { MenuItem, Category } from '../backend';
-import AccessDeniedScreen from '../components/AccessDeniedScreen';
 import MenuItemForm from '../components/MenuItemForm';
+import AccessDeniedScreen from '../components/AccessDeniedScreen';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -35,333 +34,158 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   Plus,
   Pencil,
   Trash2,
+  Eye,
+  EyeOff,
   Loader2,
-  ChefHat,
+  ShieldCheck,
   UtensilsCrossed,
-  QrCode,
-  Upload,
-  ImagePlus,
   Save,
-  X,
-  Smartphone,
+  QrCode,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const CATEGORY_LABELS: Record<Category, string> = {
-  [Category.appetizer]: '🥗 Appetizer',
-  [Category.mainCourse]: '🍛 Main Course',
-  [Category.dessert]: '🍮 Dessert',
-  [Category.beverage]: '🥤 Beverage',
+const categoryLabels: Record<string, string> = {
+  [Category.appetizer]: 'Appetizer',
+  [Category.mainCourse]: 'Main Course',
+  [Category.dessert]: 'Dessert',
+  [Category.beverage]: 'Beverage',
 };
 
-function AdminMenuRow({
-  item,
-  onEdit,
-  onDelete,
-}: {
-  item: MenuItem;
-  onEdit: (item: MenuItem) => void;
-  onDelete: (item: MenuItem) => void;
-}) {
-  const toggleMutation = useToggleAvailability();
-  const isToggling = toggleMutation.isPending;
-
-  const handleToggle = async () => {
-    try {
-      await toggleMutation.mutateAsync(item.id);
-      toast.success(`${item.name} marked as ${item.isAvailable ? 'Sold Out' : 'Available'}`);
-    } catch {
-      toast.error('Failed to update availability');
-    }
-  };
-
-  return (
-    <div className="flex items-center gap-3 p-3 md:p-4 bg-white rounded-xl border border-saffron/15 hover:border-saffron/30 transition-colors group">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-display font-bold text-deepRed text-sm md:text-base truncate">
-            {item.name}
-          </span>
-          <Badge variant="outline" className="text-xs border-saffron/30 text-spice shrink-0">
-            {CATEGORY_LABELS[item.category]}
-          </Badge>
-        </div>
-        {item.description && (
-          <p className="text-gray-500 text-xs mt-0.5 truncate">{item.description}</p>
-        )}
-        <p className="text-spice font-bold text-sm mt-0.5">₹{item.price.toFixed(0)}</p>
-      </div>
-
-      <div className="flex items-center gap-2 shrink-0">
-        <span className={`text-xs font-semibold hidden sm:block ${item.isAvailable ? 'text-green-600' : 'text-red-400'}`}>
-          {item.isAvailable ? 'Available' : 'Sold Out'}
-        </span>
-        {isToggling ? (
-          <Loader2 className="w-4 h-4 animate-spin text-saffron" />
-        ) : (
-          <Switch
-            checked={item.isAvailable}
-            onCheckedChange={handleToggle}
-            className="data-[state=checked]:bg-green-500"
-          />
-        )}
-      </div>
-
-      <div className="flex items-center gap-1 shrink-0">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onEdit(item)}
-          className="h-8 w-8 text-gray-400 hover:text-saffron hover:bg-saffron/10"
-        >
-          <Pencil className="w-3.5 h-3.5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onDelete(item)}
-          className="h-8 w-8 text-gray-400 hover:text-red-500 hover:bg-red-50"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 function UPISettingsManager() {
-  const { data: upiSettings, isLoading: upiLoading } = useUPISettings();
-  const updateMutation = useUpdateUPISettings();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: upiSettings, isLoading: settingsLoading } = useGetUpiSettings();
+  const updateUpiSettings = useUpdateUpiSettings();
 
   const [upiId, setUpiId] = useState('');
   const [merchantName, setMerchantName] = useState('');
-  const [qrPreview, setQrPreview] = useState<string | null>(null);
+  const [qrCodeData, setQrCodeData] = useState('');
   const [initialized, setInitialized] = useState(false);
 
-  // Initialize form fields once data loads
-  if (!initialized && !upiLoading && upiSettings !== undefined) {
-    setUpiId(upiSettings?.upiId ?? '');
-    setMerchantName(upiSettings?.merchantName ?? '');
+  // Initialize form from fetched data once
+  if (!initialized && upiSettings !== undefined && upiSettings !== null) {
+    setUpiId(upiSettings.upiId);
+    setMerchantName(upiSettings.merchantName);
+    setQrCodeData(upiSettings.qrCodeData);
     setInitialized(true);
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select a valid image file.');
+  const handleSave = async () => {
+    if (!upiId.trim() || !merchantName.trim()) {
+      toast.error('UPI ID and Merchant Name are required');
       return;
     }
+    try {
+      await updateUpiSettings.mutateAsync({
+        upiId: upiId.trim(),
+        merchantName: merchantName.trim(),
+        qrCodeData: qrCodeData.trim(),
+      });
+      toast.success('UPI settings saved successfully!');
+    } catch (err: any) {
+      toast.error(`Failed to save: ${err.message ?? 'Unknown error'}`);
+    }
+  };
+
+  const handleQrImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      setQrPreview(base64);
+    reader.onload = (ev) => {
+      setQrCodeData((ev.target?.result as string) ?? '');
     };
     reader.readAsDataURL(file);
   };
 
-  const handleSave = async () => {
-    if (!upiId.trim()) {
-      toast.error('UPI ID cannot be empty.');
-      return;
-    }
-    if (!merchantName.trim()) {
-      toast.error('Merchant Name cannot be empty.');
-      return;
-    }
-    try {
-      await updateMutation.mutateAsync({
-        upiId: upiId.trim(),
-        merchantName: merchantName.trim(),
-        qrCodeData: qrPreview ?? upiSettings?.qrCodeData ?? '',
-      });
-      toast.success('UPI settings saved successfully!');
-      setQrPreview(null);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    } catch {
-      toast.error('Failed to save UPI settings. Please try again.');
-    }
-  };
-
-  const handleCancelQR = () => {
-    setQrPreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const displayQR = qrPreview ?? upiSettings?.qrCodeData;
+  if (settingsLoading) {
+    return (
+      <Card className="mb-8">
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-saffron-500" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="border-saffron/20 shadow-card">
-      <CardHeader className="pb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-saffron/15 flex items-center justify-center">
-            <Smartphone className="w-5 h-5 text-saffron" />
+    <Card className="mb-8 border-saffron-200">
+      <CardHeader className="bg-saffron-50 rounded-t-lg">
+        <CardTitle className="flex items-center gap-2 text-deepRed-800 font-display">
+          <QrCode className="h-5 w-5 text-saffron-600" />
+          UPI Payment Settings
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-6 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="upiId" className="text-deepRed-700 font-medium">
+              UPI ID *
+            </Label>
+            <Input
+              id="upiId"
+              value={upiId}
+              onChange={(e) => setUpiId(e.target.value)}
+              placeholder="yourname@upi"
+              className="mt-1 border-cream-300 focus:border-saffron-400"
+            />
           </div>
           <div>
-            <CardTitle className="font-display text-lg font-black text-deepRed">
-              UPI Settings
-            </CardTitle>
-            <CardDescription className="text-sm text-gray-500">
-              Configure UPI ID, merchant name, and QR code for customer payments
-            </CardDescription>
+            <Label htmlFor="merchantName" className="text-deepRed-700 font-medium">
+              Merchant Name *
+            </Label>
+            <Input
+              id="merchantName"
+              value={merchantName}
+              onChange={(e) => setMerchantName(e.target.value)}
+              placeholder="Punjabi Bites"
+              className="mt-1 border-cream-300 focus:border-saffron-400"
+            />
           </div>
         </div>
-      </CardHeader>
 
-      <CardContent className="space-y-6">
-        {upiLoading ? (
-          <div className="space-y-3">
-            <Skeleton className="h-10 w-full rounded-lg bg-saffron/10" />
-            <Skeleton className="h-10 w-full rounded-lg bg-saffron/10" />
-            <Skeleton className="h-44 w-44 rounded-xl bg-saffron/10" />
-          </div>
-        ) : (
-          <>
-            {/* UPI ID field */}
-            <div className="space-y-1.5">
-              <Label htmlFor="upi-id" className="text-sm font-semibold text-deepRed">
-                UPI ID
-              </Label>
-              <Input
-                id="upi-id"
-                type="text"
-                placeholder="e.g. merchant@upi"
-                value={upiId}
-                onChange={(e) => setUpiId(e.target.value)}
-                className="border-saffron/30 focus-visible:ring-saffron/40"
-                disabled={updateMutation.isPending}
+        <div>
+          <Label className="text-deepRed-700 font-medium">QR Code Image</Label>
+          <div className="mt-2 flex flex-col sm:flex-row gap-4 items-start">
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleQrImageUpload}
+                className="block text-sm text-spice-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-saffron-100 file:text-deepRed-700 hover:file:bg-saffron-200 cursor-pointer"
               />
-              <p className="text-xs text-gray-400">
-                This UPI ID will be used in the payment deep link on mobile devices.
-              </p>
+              <p className="text-xs text-spice-400 mt-1">Upload a QR code image (PNG, JPG)</p>
             </div>
-
-            {/* Merchant Name field */}
-            <div className="space-y-1.5">
-              <Label htmlFor="merchant-name" className="text-sm font-semibold text-deepRed">
-                Merchant Name
-              </Label>
-              <Input
-                id="merchant-name"
-                type="text"
-                placeholder="e.g. Punjabi Bites"
-                value={merchantName}
-                onChange={(e) => setMerchantName(e.target.value)}
-                className="border-saffron/30 focus-visible:ring-saffron/40"
-                disabled={updateMutation.isPending}
-              />
-              <p className="text-xs text-gray-400">
-                Displayed to customers in the UPI app during payment.
-              </p>
-            </div>
-
-            {/* QR Code upload */}
-            <div className="space-y-3">
-              <Label className="text-sm font-semibold text-deepRed">Payment QR Code</Label>
-              <div className="flex flex-col sm:flex-row gap-5 items-start">
-                {/* QR preview */}
-                <div className="shrink-0">
-                  {displayQR ? (
-                    <div className="relative group">
-                      <img
-                        src={displayQR}
-                        alt="Payment QR Code"
-                        className="w-44 h-44 object-contain rounded-xl border-2 border-saffron/30 bg-white p-2 shadow-sm"
-                      />
-                      {qrPreview && (
-                        <div className="absolute top-1 right-1">
-                          <span className="bg-saffron text-deepRed text-xs font-bold px-2 py-0.5 rounded-full">
-                            Preview
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="w-44 h-44 rounded-xl border-2 border-dashed border-saffron/30 bg-saffron/5 flex flex-col items-center justify-center gap-2">
-                      <QrCode className="w-10 h-10 text-saffron/40" />
-                      <span className="text-xs text-gray-400 text-center px-2">
-                        No QR code uploaded yet
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Upload controls */}
-                <div className="flex-1 space-y-3">
-                  {upiSettings?.qrCodeData && !qrPreview && (
-                    <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 rounded-lg px-3 py-2 border border-green-200">
-                      <QrCode className="w-4 h-4 shrink-0" />
-                      <span className="font-medium">QR code is active for desktop customers</span>
-                    </div>
-                  )}
-                  {qrPreview && (
-                    <div className="flex items-center gap-2 text-sm text-saffron bg-saffron/10 rounded-lg px-3 py-2 border border-saffron/20">
-                      <ImagePlus className="w-4 h-4 shrink-0" />
-                      <span className="font-medium">New QR image selected — save to apply</span>
-                    </div>
-                  )}
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    Upload a QR code image (PNG, JPG). Shown to desktop customers instead of the deep link button.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                      id="qr-file-input"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="border-saffron/30 text-deepRed hover:bg-saffron/10 hover:border-saffron gap-2"
-                      disabled={updateMutation.isPending}
-                    >
-                      <Upload className="w-4 h-4" />
-                      {upiSettings?.qrCodeData ? 'Replace QR Code' : 'Upload QR Code'}
-                    </Button>
-                    {qrPreview && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleCancelQR}
-                        disabled={updateMutation.isPending}
-                        className="text-gray-400 hover:text-red-500 hover:bg-red-50 gap-2"
-                      >
-                        <X className="w-4 h-4" />
-                        Cancel
-                      </Button>
-                    )}
-                  </div>
-                </div>
+            {qrCodeData && (
+              <div className="border border-cream-200 rounded-lg p-2 bg-white">
+                <img
+                  src={qrCodeData}
+                  alt="QR Code Preview"
+                  className="h-24 w-24 object-contain"
+                />
               </div>
-            </div>
+            )}
+          </div>
+        </div>
 
-            {/* Save button */}
-            <div className="pt-2 border-t border-saffron/15">
-              <Button
-                onClick={handleSave}
-                disabled={updateMutation.isPending || !upiId.trim() || !merchantName.trim()}
-                className="bg-saffron hover:bg-saffron/90 text-deepRed font-bold gap-2 shadow-md"
-              >
-                {updateMutation.isPending ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-                {updateMutation.isPending ? 'Saving…' : 'Save UPI Settings'}
-              </Button>
-            </div>
-          </>
-        )}
+        <Button
+          onClick={handleSave}
+          disabled={updateUpiSettings.isPending}
+          className="bg-saffron-500 hover:bg-saffron-400 text-deepRed-900 font-semibold"
+        >
+          {updateUpiSettings.isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-2" />
+              Save UPI Settings
+            </>
+          )}
+        </Button>
       </CardContent>
     </Card>
   );
@@ -369,199 +193,265 @@ function UPISettingsManager() {
 
 export default function AdminPanel() {
   const { identity } = useInternetIdentity();
-  const { isFetching: actorFetching } = useActor();
   const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
-  const { data: menuItems, isLoading: menuLoading } = useGetMenuItems();
-  const deleteMutation = useDeleteMenuItem();
+  const { data: menuItems, isLoading: itemsLoading } = useGetMenuItems();
+  const addMenuItem = useAddMenuItem();
+  const updateMenuItem = useUpdateMenuItem();
+  const deleteMenuItem = useDeleteMenuItem();
+  const toggleAvailability = useToggleAvailability();
 
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editItem, setEditItem] = useState<MenuItem | null>(null);
-  const [deleteItem, setDeleteItem] = useState<MenuItem | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [deletingItemId, setDeletingItemId] = useState<bigint | null>(null);
 
   const isAuthenticated = !!identity;
 
-  if (actorFetching || adminLoading) {
+  if (!isAuthenticated || adminLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        <Skeleton className="h-10 w-64 mb-8 bg-saffron/20" />
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-16 rounded-xl bg-saffron/10" />
-          ))}
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-10 w-10 animate-spin text-saffron-500" />
       </div>
     );
   }
 
-  if (!isAuthenticated || !isAdmin) {
+  if (!isAdmin) {
     return <AccessDeniedScreen />;
   }
 
-  const handleDelete = async () => {
-    if (!deleteItem) return;
+  const handleAdd = async (data: {
+    name: string;
+    description: string;
+    price: number;
+    category: Category;
+    imageUrl: string | null;
+  }) => {
     try {
-      await deleteMutation.mutateAsync(deleteItem.id);
-      toast.success(`"${deleteItem.name}" deleted`);
-      setDeleteItem(null);
-    } catch {
-      toast.error('Failed to delete item');
+      await addMenuItem.mutateAsync(data);
+      toast.success('Menu item added!');
+      setShowAddForm(false);
+    } catch (err: any) {
+      toast.error(`Failed to add item: ${err.message ?? 'Unknown error'}`);
     }
   };
 
-  const sortedItems = menuItems
-    ? [...menuItems].sort((a, b) => {
-        const catOrder = [Category.appetizer, Category.mainCourse, Category.dessert, Category.beverage];
-        const catDiff = catOrder.indexOf(a.category) - catOrder.indexOf(b.category);
-        if (catDiff !== 0) return catDiff;
-        return a.name.localeCompare(b.name);
-      })
-    : [];
+  const handleUpdate = async (data: {
+    name: string;
+    description: string;
+    price: number;
+    category: Category;
+    imageUrl: string | null;
+  }) => {
+    if (!editingItem) return;
+    try {
+      await updateMenuItem.mutateAsync({ id: editingItem.id, ...data });
+      toast.success('Menu item updated!');
+      setEditingItem(null);
+    } catch (err: any) {
+      toast.error(`Failed to update item: ${err.message ?? 'Unknown error'}`);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (deletingItemId === null) return;
+    try {
+      await deleteMenuItem.mutateAsync(deletingItemId);
+      toast.success('Menu item deleted!');
+      setDeletingItemId(null);
+    } catch (err: any) {
+      toast.error(`Failed to delete item: ${err.message ?? 'Unknown error'}`);
+    }
+  };
+
+  const handleToggle = async (id: bigint) => {
+    try {
+      await toggleAvailability.mutateAsync(id);
+      toast.success('Availability updated!');
+    } catch (err: any) {
+      toast.error(`Failed to toggle: ${err.message ?? 'Unknown error'}`);
+    }
+  };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-      {/* Page header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-deepRed flex items-center justify-center">
-            <ChefHat className="w-5 h-5 text-saffron" />
-          </div>
-          <div>
-            <h1 className="font-display text-2xl md:text-3xl font-black text-deepRed">
-              Admin Panel
-            </h1>
-            <p className="text-gray-500 text-sm">
-              Manage menu items and payment settings
-            </p>
-          </div>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Page Header */}
+      <div className="flex items-center gap-3 mb-8">
+        <div className="bg-saffron-100 rounded-full p-3">
+          <ShieldCheck className="h-8 w-8 text-saffron-600" />
         </div>
-        <Button
-          onClick={() => setShowAddDialog(true)}
-          className="bg-saffron hover:bg-saffron/90 text-deepRed font-bold gap-2 shadow-md"
-        >
-          <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">Add Item</span>
-          <span className="sm:hidden">Add</span>
-        </Button>
-      </div>
-
-      {/* UPI Settings Manager */}
-      <div className="mb-8">
-        <UPISettingsManager />
-      </div>
-
-      {/* Decorative divider */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="h-px flex-1 bg-gradient-to-r from-saffron/40 to-transparent" />
-        <span className="text-saffron text-sm">✦</span>
-        <div className="h-px flex-1 bg-gradient-to-l from-saffron/40 to-transparent" />
-      </div>
-
-      {/* Menu Items section header */}
-      <div className="flex items-center gap-2 mb-4">
-        <ChefHat className="w-5 h-5 text-saffron" />
-        <h2 className="font-display text-xl font-black text-deepRed">Menu Items</h2>
-        <span className="text-gray-400 text-sm ml-1">
-          ({menuItems?.length ?? 0} item{menuItems?.length !== 1 ? 's' : ''})
-        </span>
-      </div>
-
-      {/* Loading */}
-      {menuLoading && (
-        <div className="space-y-3">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-16 rounded-xl bg-saffron/10" />
-          ))}
+        <div>
+          <h1 className="font-display text-3xl font-bold text-deepRed-800">Admin Panel</h1>
+          <p className="text-spice-600">Manage your restaurant menu and settings</p>
         </div>
-      )}
+      </div>
 
-      {/* Empty state */}
-      {!menuLoading && sortedItems.length === 0 && (
-        <div className="text-center py-16 bg-white rounded-2xl border border-saffron/20">
-          <div className="w-16 h-16 rounded-full bg-saffron/10 flex items-center justify-center mx-auto mb-4">
-            <UtensilsCrossed className="w-8 h-8 text-saffron/60" />
-          </div>
-          <h3 className="font-display text-xl font-bold text-deepRed mb-2">No Menu Items Yet</h3>
-          <p className="text-gray-500 text-sm mb-6">Start building your menu by adding your first item.</p>
+      {/* UPI Settings */}
+      <UPISettingsManager />
+
+      {/* Menu Items Section */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between bg-deepRed-50 rounded-t-lg">
+          <CardTitle className="flex items-center gap-2 text-deepRed-800 font-display">
+            <UtensilsCrossed className="h-5 w-5 text-deepRed-600" />
+            Menu Items
+          </CardTitle>
           <Button
-            onClick={() => setShowAddDialog(true)}
-            className="bg-saffron hover:bg-saffron/90 text-deepRed font-bold gap-2"
+            onClick={() => setShowAddForm(true)}
+            className="bg-saffron-500 hover:bg-saffron-400 text-deepRed-900 font-semibold"
           >
-            <Plus className="w-4 h-4" />
-            Add First Item
+            <Plus className="h-4 w-4 mr-1" />
+            Add Item
           </Button>
-        </div>
-      )}
-
-      {/* Menu items list */}
-      {!menuLoading && sortedItems.length > 0 && (
-        <div className="space-y-2.5">
-          {sortedItems.map((item) => (
-            <AdminMenuRow
-              key={item.id.toString()}
-              item={item}
-              onEdit={setEditItem}
-              onDelete={setDeleteItem}
-            />
-          ))}
-        </div>
-      )}
+        </CardHeader>
+        <CardContent className="pt-6">
+          {itemsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-saffron-500" />
+            </div>
+          ) : !menuItems || menuItems.length === 0 ? (
+            <div className="text-center py-12">
+              <UtensilsCrossed className="h-12 w-12 text-cream-300 mx-auto mb-3" />
+              <p className="text-spice-500 font-medium">No menu items yet</p>
+              <p className="text-spice-400 text-sm mt-1">
+                Click "Add Item" to create your first menu item
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {menuItems.map((item) => (
+                <div
+                  key={item.id.toString()}
+                  className="flex items-center gap-4 p-4 bg-cream-50 rounded-lg border border-cream-200 hover:border-saffron-200 transition-colors"
+                >
+                  {item.imageUrl && (
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="h-16 w-16 object-cover rounded-lg flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-deepRed-800 truncate">{item.name}</h3>
+                      <Badge
+                        variant="outline"
+                        className="text-xs border-saffron-200 text-saffron-700"
+                      >
+                        {categoryLabels[item.category as unknown as string] ?? item.category}
+                      </Badge>
+                      <Badge
+                        variant={item.isAvailable ? 'default' : 'secondary'}
+                        className={
+                          item.isAvailable
+                            ? 'bg-green-100 text-green-700 border-green-200 text-xs'
+                            : 'bg-gray-100 text-gray-500 text-xs'
+                        }
+                      >
+                        {item.isAvailable ? 'Available' : 'Unavailable'}
+                      </Badge>
+                    </div>
+                    <p className="text-spice-500 text-sm mt-1 truncate">{item.description}</p>
+                    <p className="text-saffron-600 font-bold text-sm mt-1">
+                      ₹{item.price.toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => handleToggle(item.id)}
+                      disabled={toggleAvailability.isPending}
+                      className="h-8 w-8 border-cream-300 hover:border-saffron-300"
+                      title={item.isAvailable ? 'Mark unavailable' : 'Mark available'}
+                    >
+                      {item.isAvailable ? (
+                        <EyeOff className="h-4 w-4 text-spice-500" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-green-600" />
+                      )}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => setEditingItem(item)}
+                      className="h-8 w-8 border-cream-300 hover:border-saffron-300"
+                      title="Edit item"
+                    >
+                      <Pencil className="h-4 w-4 text-spice-600" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => setDeletingItemId(item.id)}
+                      className="h-8 w-8 border-cream-300 hover:border-red-300 hover:text-red-600"
+                      title="Delete item"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Add Item Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="max-w-lg">
+      <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl font-black text-deepRed">
-              Add New Menu Item
-            </DialogTitle>
-            <DialogDescription>
-              Fill in the details to add a new item to the menu.
-            </DialogDescription>
+            <DialogTitle className="font-display text-deepRed-800">Add Menu Item</DialogTitle>
           </DialogHeader>
           <MenuItemForm
-            onSuccess={() => setShowAddDialog(false)}
-            onCancel={() => setShowAddDialog(false)}
+            onSubmit={handleAdd}
+            onCancel={() => setShowAddForm(false)}
+            isLoading={addMenuItem.isPending}
           />
         </DialogContent>
       </Dialog>
 
       {/* Edit Item Dialog */}
-      <Dialog open={!!editItem} onOpenChange={(open) => !open && setEditItem(null)}>
-        <DialogContent className="max-w-lg">
+      <Dialog open={!!editingItem} onOpenChange={(open) => !open && setEditingItem(null)}>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl font-black text-deepRed">
-              Edit Menu Item
-            </DialogTitle>
-            <DialogDescription>
-              Update the details for this menu item.
-            </DialogDescription>
+            <DialogTitle className="font-display text-deepRed-800">Edit Menu Item</DialogTitle>
           </DialogHeader>
-          {editItem && (
+          {editingItem && (
             <MenuItemForm
-              item={editItem}
-              onSuccess={() => setEditItem(null)}
-              onCancel={() => setEditItem(null)}
+              initialData={editingItem}
+              onSubmit={handleUpdate}
+              onCancel={() => setEditingItem(null)}
+              isLoading={updateMenuItem.isPending}
             />
           )}
         </DialogContent>
       </Dialog>
 
       {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteItem} onOpenChange={(open) => !open && setDeleteItem(null)}>
+      <AlertDialog
+        open={deletingItemId !== null}
+        onOpenChange={(open) => !open && setDeletingItemId(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-display text-deepRed">Delete Menu Item?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete <strong>"{deleteItem?.name}"</strong>? This action cannot be undone.
+            <AlertDialogTitle className="font-display text-deepRed-800">
+              Delete Menu Item?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-spice-600">
+              This action cannot be undone. The menu item will be permanently removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="border-cream-300">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              disabled={deleteMenuItem.isPending}
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
-              {deleteMutation.isPending ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+              {deleteMenuItem.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Deleting...
+                </>
               ) : (
                 'Delete'
               )}

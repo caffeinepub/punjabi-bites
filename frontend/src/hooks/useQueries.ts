@@ -1,9 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import { useInternetIdentity } from './useInternetIdentity';
-import { MenuItem, Category, UpiSettings } from '../backend';
+import { MenuItem, MenuItemId, Category, UpiSettings } from '../backend';
 
-// ─── Queries ────────────────────────────────────────────────────────────────
+// ─── Menu Items ───────────────────────────────────────────────────────────────
 
 export function useGetMenuItems() {
   const { actor, isFetching } = useActor();
@@ -14,59 +13,21 @@ export function useGetMenuItems() {
       if (!actor) return [];
       return actor.getMenuItems();
     },
-    enabled: !!actor && !isFetching,
-    refetchInterval: 30_000,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30_000),
-    staleTime: 10_000,
+    enabled: !!actor,
   });
 }
 
-export function useIsAdmin() {
-  const { actor, isFetching } = useActor();
-  const { identity } = useInternetIdentity();
-  const principalKey = identity?.getPrincipal().toString() ?? 'anonymous';
+export function useGetAllMenuItems() {
+  const { actor } = useActor();
 
-  return useQuery<boolean>({
-    queryKey: ['isAdmin', principalKey],
+  return useQuery<MenuItem[]>({
+    queryKey: ['allMenuItems'],
     queryFn: async () => {
-      if (!actor) return false;
-      try {
-        return await actor.isCallerAdmin();
-      } catch {
-        return false;
-      }
+      if (!actor) return [];
+      return actor.getMenuItems();
     },
-    enabled: !!actor && !isFetching,
-    staleTime: 0,
+    enabled: !!actor,
   });
-}
-
-export function useUPISettings() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<UpiSettings | null>({
-    queryKey: ['upiSettings'],
-    queryFn: async () => {
-      if (!actor) return null;
-      return actor.getUpiSettings();
-    },
-    enabled: !!actor && !isFetching,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30_000),
-    staleTime: 15_000,
-    gcTime: 60_000,
-  });
-}
-
-// ─── Mutations ───────────────────────────────────────────────────────────────
-
-interface AddMenuItemParams {
-  name: string;
-  description: string;
-  price: number;
-  category: Category;
-  imageUrl: string | null;
 }
 
 export function useAddMenuItem() {
@@ -74,29 +35,27 @@ export function useAddMenuItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: AddMenuItemParams) => {
+    mutationFn: async ({
+      name,
+      description,
+      price,
+      category,
+      imageUrl,
+    }: {
+      name: string;
+      description: string;
+      price: number;
+      category: Category;
+      imageUrl: string | null;
+    }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.addMenuItem(
-        params.name,
-        params.description,
-        params.price,
-        params.category,
-        params.imageUrl
-      );
+      return actor.addMenuItem(name, description, price, category, imageUrl);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      queryClient.invalidateQueries({ queryKey: ['allMenuItems'] });
     },
   });
-}
-
-interface UpdateMenuItemParams {
-  id: bigint;
-  name: string;
-  description: string;
-  price: number;
-  category: Category;
-  imageUrl: string | null;
 }
 
 export function useUpdateMenuItem() {
@@ -104,19 +63,27 @@ export function useUpdateMenuItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: UpdateMenuItemParams) => {
+    mutationFn: async ({
+      id,
+      name,
+      description,
+      price,
+      category,
+      imageUrl,
+    }: {
+      id: MenuItemId;
+      name: string;
+      description: string;
+      price: number;
+      category: Category;
+      imageUrl: string | null;
+    }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateMenuItem(
-        params.id,
-        params.name,
-        params.description,
-        params.price,
-        params.category,
-        params.imageUrl
-      );
+      return actor.updateMenuItem(id, name, description, price, category, imageUrl);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      queryClient.invalidateQueries({ queryKey: ['allMenuItems'] });
     },
   });
 }
@@ -126,12 +93,13 @@ export function useDeleteMenuItem() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: bigint) => {
+    mutationFn: async (id: MenuItemId) => {
       if (!actor) throw new Error('Actor not available');
       return actor.deleteMenuItem(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      queryClient.invalidateQueries({ queryKey: ['allMenuItems'] });
     },
   });
 }
@@ -141,27 +109,79 @@ export function useToggleAvailability() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: bigint) => {
+    mutationFn: async (id: MenuItemId) => {
       if (!actor) throw new Error('Actor not available');
       return actor.toggleAvailability(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menuItems'] });
+      queryClient.invalidateQueries({ queryKey: ['allMenuItems'] });
     },
   });
 }
 
-export function useUpdateUPISettings() {
+// ─── Admin / Auth ─────────────────────────────────────────────────────────────
+
+export function useIsAdmin() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<boolean>({
+    queryKey: ['isAdmin'],
+    queryFn: async () => {
+      if (!actor) return false;
+      return actor.isCallerAdmin();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+// ─── UPI Settings ─────────────────────────────────────────────────────────────
+
+export function useGetUpiSettings() {
+  const { actor } = useActor();
+
+  return useQuery<UpiSettings | null>({
+    queryKey: ['upiSettings'],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getUpiSettings();
+    },
+    enabled: !!actor,
+  });
+}
+
+// Alias for backward compatibility
+export const useUPISettings = useGetUpiSettings;
+
+export function useUpdateUpiSettings() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newSettings: UpiSettings) => {
+    mutationFn: async (settings: UpiSettings) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.updateUpiSettings(newSettings);
+      return actor.updateUpiSettings(settings);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['upiSettings'] });
     },
+  });
+}
+
+// Alias for backward compatibility
+export const useUpdateUPISettings = useUpdateUpiSettings;
+
+// Legacy alias for payment QR code (uses UPI settings qrCodeData)
+export function useGetPaymentQRCode() {
+  const { actor } = useActor();
+
+  return useQuery<string | null>({
+    queryKey: ['paymentQRCode'],
+    queryFn: async () => {
+      if (!actor) return null;
+      const settings = await actor.getUpiSettings();
+      return settings?.qrCodeData ?? null;
+    },
+    enabled: !!actor,
   });
 }

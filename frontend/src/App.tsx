@@ -1,21 +1,20 @@
 import { RouterProvider, createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { CartProvider } from './contexts/CartContext';
 import { Toaster } from '@/components/ui/sonner';
 import Layout from './components/Layout';
 import MenuDisplay from './pages/MenuDisplay';
 import AdminPanel from './pages/AdminPanel';
 import PaymentPage from './pages/PaymentPage';
-import OrderReceiptPage from './pages/OrderReceiptPage';
-import { CartProvider } from './contexts/CartContext';
 import ErrorBoundary from './components/ErrorBoundary';
+
+const queryClient = new QueryClient();
 
 const rootRoute = createRootRoute({
   component: () => (
-    <>
-      <Layout>
-        <Outlet />
-      </Layout>
-      <Toaster richColors position="top-right" />
-    </>
+    <Layout>
+      <Outlet />
+    </Layout>
   ),
 });
 
@@ -37,13 +36,7 @@ const paymentRoute = createRoute({
   component: PaymentPage,
 });
 
-const receiptRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/receipt',
-  component: OrderReceiptPage,
-});
-
-const routeTree = rootRoute.addChildren([indexRoute, adminRoute, paymentRoute, receiptRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, adminRoute, paymentRoute]);
 
 const router = createRouter({ routeTree });
 
@@ -56,9 +49,12 @@ declare module '@tanstack/react-router' {
 export default function App() {
   return (
     <ErrorBoundary>
-      <CartProvider>
-        <RouterProvider router={router} />
-      </CartProvider>
+      <QueryClientProvider client={queryClient}>
+        <CartProvider>
+          <RouterProvider router={router} />
+          <Toaster richColors position="top-right" />
+        </CartProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }

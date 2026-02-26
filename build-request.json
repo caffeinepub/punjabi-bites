@@ -1,55 +1,40 @@
 {
   "kind": "build_request",
-  "title": "Fix Pay Now button not showing in CartSidebar",
+  "title": "Fix payment deep links opening WhatsApp instead of GPay/PhonePe/Paytm",
   "projectName": "Punjabi Bites",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the Pay Now button in CartSidebar so it is visible and functional on all devices, including mobile. The button should appear in the cart panel when items are in the cart and trigger the UPI deep link flow. Ensure it is not hidden by CSS, conditional rendering logic, or z-index/overflow issues.",
+      "text": "Fix the UPI payment deep links in UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx so that clicking GPay, PhonePe, and Paytm buttons opens the correct respective payment app (GPay, PhonePe, Paytm) instead of WhatsApp. Use the correct platform-specific UPI URI schemes: 'tez://upi/pay?' for GPay, 'phonepe://pay?' for PhonePe, and 'paytmmp://pay?' for Paytm. Do not change any other UI, layout, or functionality.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-7"
         ],
         "quotes": [
-          "its not working payment option is not showing"
+          "Instead of opening gpay phone pe and paytm while clicking on payment its opening whatsapp . Rectify that"
         ]
       },
       "acceptanceCriteria": [
-        "The Pay Now button is visible in the CartSidebar on mobile devices when the cart contains at least one item.",
-        "The Pay Now button is visible on desktop as well.",
-        "Tapping/clicking the Pay Now button on mobile initiates the UPI deep link flow.",
-        "No layout overflow or z-index issue hides the button on small screens.",
-        "The button renders consistently across common mobile viewport sizes (e.g., 375px, 414px width)."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Audit the PaymentPage UPI settings fetch: if UPI settings are missing or empty, display a user-friendly fallback message instead of a blank or broken payment UI, so users always understand the payment state.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "payment option is not showing"
-        ]
-      },
-      "acceptanceCriteria": [
-        "If UPI settings are not configured, the PaymentPage shows a clear message (e.g., 'Payment is currently unavailable. Please contact the restaurant.') instead of a blank screen.",
-        "If UPI settings are available, the normal payment flow is displayed without errors."
+        "Clicking the GPay button opens the GPay app (or GPay's UPI deep link URL) and does not open WhatsApp",
+        "Clicking the PhonePe button opens the PhonePe app (or PhonePe's UPI deep link URL) and does not open WhatsApp",
+        "Clicking the Paytm button opens the Paytm app (or Paytm's UPI deep link URL) and does not open WhatsApp",
+        "No other UI components, pages, or functionality are changed",
+        "The fix applies to both UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx if both build deep links"
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "Do not change the backend schema or UPI data model."
+    "Do not change any UI layout, styling, or other interface elements",
+    "Do not modify any pages, components, or logic unrelated to the payment deep link URLs",
+    "Only fix the incorrect deep link/URL scheme that was causing WhatsApp to open"
   ],
   "nonGoals": [
-    "Adding new payment methods or third-party payment gateways.",
-    "Redesigning the cart UI beyond fixing the Pay Now button visibility.",
-    "Changing the UPI deep link logic itself unless it is directly causing the button to not render."
+    "Changing the payment flow or confirmation logic",
+    "Adding new payment options",
+    "Modifying the cart, menu, or admin panel",
+    "Any backend changes"
   ],
   "imageRequirements": {
     "required": [],

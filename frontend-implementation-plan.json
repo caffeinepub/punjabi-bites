@@ -1,38 +1,28 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Pay Now button visibility in CartSidebar",
+  "title": "Fix UPI payment deep links to open correct payment apps",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Fix the Pay Now button in CartSidebar so it is visible and functional on all devices, including mobile",
+      "summary": "Fix the UPI payment deep links in UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx so that clicking GPay, PhonePe, and Paytm buttons opens the correct respective payment app instead of WhatsApp",
       "acceptanceCriteria": [
-        "The Pay Now button is visible in the CartSidebar on mobile devices when the cart contains at least one item.",
-        "The Pay Now button is visible on desktop as well.",
-        "Tapping/clicking the Pay Now button on mobile initiates the UPI deep link flow.",
-        "No layout overflow or z-index issue hides the button on small screens.",
-        "The button renders consistently across common mobile viewport sizes (e.g., 375px, 414px width)."
+        "Clicking the GPay button opens the GPay app (or GPay's UPI deep link URL) and does not open WhatsApp",
+        "Clicking the PhonePe button opens the PhonePe app (or PhonePe's UPI deep link URL) and does not open WhatsApp",
+        "Clicking the Paytm button opens the Paytm app (or Paytm's UPI deep link URL) and does not open WhatsApp",
+        "No other UI components, pages, or functionality are changed",
+        "The fix applies to both UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx if both build deep links"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/CartSidebar.tsx",
+          "path": "frontend/src/components/UpiPaymentButtons.tsx",
           "operation": "modify",
-          "description": "Audit and fix the Pay Now button visibility and layout issues. Ensure the button is not hidden by CSS overflow, z-index problems, or conditional rendering logic. Verify the button appears when cart has items, is properly styled for mobile viewports (375px, 414px widths), and triggers the UPI deep link flow correctly. Check container sizing, scrolling behavior, and sticky/fixed positioning that might clip the button on small screens. Test the UPI deep link generation and mobile-specific payment flow trigger."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Audit the PaymentPage UPI settings fetch and display a user-friendly fallback message when settings are missing",
-      "acceptanceCriteria": [
-        "If UPI settings are not configured, the PaymentPage shows a clear message (e.g., 'Payment is currently unavailable. Please contact the restaurant.') instead of a blank screen.",
-        "If UPI settings are available, the normal payment flow is displayed without errors."
-      ],
-      "file_operations": [
+          "description": "Update the UPI deep link URL construction to use the correct platform-specific URI schemes: 'tez://upi/pay?' for GPay, 'phonepe://pay?' for PhonePe, and 'paytmmp://pay?' for Paytm. Replace any incorrect URL schemes that are currently causing WhatsApp to open. Preserve all other functionality, UI layout, and styling."
+        },
         {
-          "path": "frontend/src/pages/PaymentPage.tsx",
+          "path": "frontend/src/components/UpiPaymentOptionsModal.tsx",
           "operation": "modify",
-          "description": "Add a fallback UI state for when UPI settings are null or empty. When getUpiSettings() returns null, display a user-friendly message such as 'Payment is currently unavailable. Please contact the restaurant.' Include a link or button to return to the menu. Ensure the loading state is handled separately from the missing-settings state. Keep the existing payment flow intact when settings are available."
+          "description": "Update the UPI deep link URL construction to use the correct platform-specific URI schemes: 'tez://upi/pay?' for GPay, 'phonepe://pay?' for PhonePe, and 'paytmmp://pay?' for Paytm. Replace any incorrect URL schemes that are currently causing WhatsApp to open. Preserve all other functionality, UI layout, modal behavior, and styling."
         }
       ]
     }

@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-pay-now-button-in-cartsidebar-so-it-is-visible-and-functional-on-all-devices-including-mobile-the-button-should-appear-in-the-cart-panel-when-items-are-in-the-cart-and-trigger-the-upi-deep-link-flow-ensure-it-is-not-hidden-by-css-conditional-rendering-logic-or-z-index-overflow-issues",
-      "featureTitle": "Fix the Pay Now button in CartSidebar so it is visible and functional on all devices, including mobile. The button should appear in the cart panel when items are in the cart and trigger the UPI deep link flow. Ensure it is not hidden by CSS, conditional rendering logic, or z-index/overflow issues.",
+      "featureId": "feature-fix-the-upi-payment-deep-links-in-upipaymentbuttons-tsx-and-upipaymentoptionsmodal-tsx-so-that-clicking-gpay-phonepe-and-paytm-buttons-opens-the-correct-respective-payment-app-gpay-phonepe-paytm-instead-of-whatsapp-use-the-correct-platform-specific-upi-uri-schemes-tez-upi-pay-for-gpay-phonepe-pay-for-phonepe-and-paytmmp-pay-for-paytm-do-not-change-any-other-ui-layout-or-functionality",
+      "featureTitle": "Fix the UPI payment deep links in UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx so that clicking GPay, PhonePe, and Paytm buttons opens the correct respective payment app (GPay, PhonePe, Paytm) instead of WhatsApp. Use the correct platform-specific UPI URI schemes: 'tez://upi/pay?' for GPay, 'phonepe://pay?' for PhonePe, and 'paytmmp://pay?' for Paytm. Do not change any other UI, layout, or functionality.",
       "files": [
-        "frontend/src/components/CartSidebar.tsx"
+        "frontend/src/components/UpiPaymentButtons.tsx",
+        "frontend/src/components/UpiPaymentOptionsModal.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -20,28 +21,6 @@
       ],
       "testIds": [
         "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-audit-the-paymentpage-upi-settings-fetch-if-upi-settings-are-missing-or-empty-display-a-user-friendly-fallback-message-instead-of-a-blank-or-broken-payment-ui-so-users-always-understand-the-payment-state",
-      "featureTitle": "Audit the PaymentPage UPI settings fetch: if UPI settings are missing or empty, display a user-friendly fallback message instead of a blank or broken payment UI, so users always understand the payment state.",
-      "files": [
-        "frontend/src/pages/PaymentPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "camera@1.0.0",
-        "qr-code@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
       ],
       "confidence": "high"
     }

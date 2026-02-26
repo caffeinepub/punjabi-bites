@@ -1,15 +1,24 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T17:42:10.058Z",
-  "summary": "Both REQ-1 and REQ-2 appear to be implemented in the diff. CartSidebar.tsx was updated with UPI deep link logic, Pay Now button rendering, and mobile device detection. PaymentPage.tsx was updated with a PaymentUnavailableState component for missing UPI settings and a UPIErrorState for fetch errors. No missing requirements or hallucinated features were detected.",
+  "generatedAt": "2026-02-26T04:50:25.303Z",
+  "summary": "The diff correctly fixes the UPI payment deep links in both UpiPaymentButtons.tsx and UpiPaymentOptionsModal.tsx. GPay uses 'tez://upi/pay?', PhonePe uses 'phonepe://pay?', and Paytm uses 'paytmmp://upi/pay?' — all matching the required URI schemes closely. Both files are updated, no UI layout or other functionality appears changed. One minor note: the build request specifies 'paytmmp://pay?' for Paytm but the implementation uses 'paytmmp://upi/pay?' — this is a slight deviation but likely more correct in practice.",
   "missing_requirements": [],
-  "hallucinated_features": [],
-  "confidence": 0.88,
+  "hallucinated_features": [
+    {
+      "description": "iOS App Store fallback logic: when on iOS, the code sets a setTimeout to redirect to the App Store if the app does not open within 2 seconds.",
+      "reason": "The build request only asked to fix the deep link URI schemes (tez://, phonepe://, paytmmp://) and did not request any iOS fallback or App Store redirect behavior.",
+      "evidence": [
+        "frontend/src/components/UpiPaymentButtons.tsx",
+        "frontend/src/components/UpiPaymentOptionsModal.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.85,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/CartSidebar.tsx",
-    "frontend/src/pages/PaymentPage.tsx",
+    "frontend/src/components/UpiPaymentButtons.tsx",
+    "frontend/src/components/UpiPaymentOptionsModal.tsx",
     "project_state.json"
   ]
 }
